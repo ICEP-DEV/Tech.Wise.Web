@@ -1,0 +1,39 @@
+/* Default styles */
+.navbar-brand {
+    font-weight: bold;
+}
+.navbar-toggler-icon {
+    background-color: #000; /* Hamburger menu color */
+}
+.nav-link {
+    color: #000; /* Navigation link color */
+}
+.navbar-nav .nav-item {
+    margin-right: 10px; /* Spacing between navigation items */
+}
+
+/* Media queries for responsiveness */
+@media (max-width: 992px) {
+    .navbar-collapse {
+        justify-content: flex-end; /* Align navigation links to the right */
+    }
+    .navbar-nav .nav-item {
+        margin-right: 0; /* Remove margin between navigation items */
+        margin-bottom: 10px; /* Add spacing between navigation items */
+    }
+    .navbar-toggler {
+        margin-right: 10px; /* Add margin between toggler and navigation links */
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar-brand {
+        font-size: 1.5rem; /* Decrease brand name font size */
+    }
+}
+
+@media (max-width: 576px) {
+    .navbar-brand {
+        font-size: 1.2rem; /* Further decrease brand name font size */
+    }
+}
