@@ -2,5 +2,5 @@ payment_key = sk_test_ba4382c256544e703a5e664af13f87cbd8fb885c
 Test Public Key = pk_test_1f5d5c38cebf99f47c11f8ac08e38aae231da156
 
 
-user: icep.memory@gmail.com
-pass: @Newfuture1
+user: icep.memory1@gmail.com
+pass: @FirstTeam1.ICEP
