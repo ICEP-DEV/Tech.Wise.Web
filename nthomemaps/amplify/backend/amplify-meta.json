@@ -1,0 +1,56 @@
+{
+  "providers": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-nthomemaps-dev-bdc8e-authRole",
+      "UnauthRoleArn": "arn:aws:iam::473238741853:role/amplify-nthomemaps-dev-bdc8e-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::473238741853:role/amplify-nthomemaps-dev-bdc8e-authRole",
+      "Region": "eu-west-1",
+      "DeploymentBucketName": "amplify-nthomemaps-dev-bdc8e-deployment",
+      "UnauthRoleName": "amplify-nthomemaps-dev-bdc8e-unauthRole",
+      "StackName": "amplify-nthomemaps-dev-bdc8e",
+      "StackId": "arn:aws:cloudformation:eu-west-1:473238741853:stack/amplify-nthomemaps-dev-bdc8e/bdc96510-74c0-11ef-bfc2-0a14f5a484b7",
+      "AmplifyAppId": "d2akpoltslmhm9"
+    }
+  },
+  "auth": {
+    "nthomemapsc04fa00f": {
+      "service": "Cognito",
+      "providerPlugin": "awscloudformation",
+      "dependsOn": [],
+      "customAuth": false,
+      "frontendAuthConfig": {
+        "socialProviders": [],
+        "usernameAttributes": [],
+        "signupAttributes": [
+          "EMAIL"
+        ],
+        "passwordProtectionSettings": {
+          "passwordPolicyMinLength": 8,
+          "passwordPolicyCharacters": []
+        },
+        "mfaConfiguration": "OFF",
+        "mfaTypes": [
+          "SMS"
+        ],
+        "verificationMechanisms": [
+          "EMAIL"
+        ]
+      },
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-nthomemaps-dev-bdc8e-deployment/amplify-cfn-templates/auth/nthomemapsc04fa00f-cloudformation-template.json",
+        "logicalId": "authnthomemapsc04fa00f"
+      },
+      "lastPushTimeStamp": "2024-09-17T06:51:34.493Z",
+      "output": {
+        "UserPoolId": "eu-west-1_E0I2ZkCH8",
+        "AppClientIDWeb": "75sma8qarqpgdbbf3me9dodbba",
+        "AppClientID": "6qu93ai5iin0l2hnqpnepmkfnl",
+        "IdentityPoolId": "eu-west-1:4ee9dc55-67b2-41de-a497-6ee7d921b239",
+        "UserPoolArn": "arn:aws:cognito-idp:eu-west-1:473238741853:userpool/eu-west-1_E0I2ZkCH8",
+        "IdentityPoolName": "nthomemapsc04fa00f_identitypool_c04fa00f__dev",
+        "UserPoolName": "nthomemapsc04fa00f_userpool_c04fa00f"
+      },
+      "lastPushDirHash": "Y9siLuxW5iBnHZVMLBnWucJ0oP8="
+    }
+  }
+}
