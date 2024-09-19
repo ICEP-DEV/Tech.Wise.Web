@@ -1,0 +1,20 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-nthomemaps-dev-bdc8e-authRole",
+      "UnauthRoleArn": "arn:aws:iam::473238741853:role/amplify-nthomemaps-dev-bdc8e-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::473238741853:role/amplify-nthomemaps-dev-bdc8e-authRole",
+      "Region": "eu-west-1",
+      "DeploymentBucketName": "amplify-nthomemaps-dev-bdc8e-deployment",
+      "UnauthRoleName": "amplify-nthomemaps-dev-bdc8e-unauthRole",
+      "StackName": "amplify-nthomemaps-dev-bdc8e",
+      "StackId": "arn:aws:cloudformation:eu-west-1:473238741853:stack/amplify-nthomemaps-dev-bdc8e/bdc96510-74c0-11ef-bfc2-0a14f5a484b7",
+      "AmplifyAppId": "d2akpoltslmhm9"
+    },
+    "categories": {
+      "auth": {
+        "nthomemapsc04fa00f": {}
+      }
+    }
+  }
+}
