@@ -11,7 +11,7 @@ const containerStyle = {
 
 const libraries = ['places'];
 
-const GoogleMapSection1 = () => {
+const GoogleMapSection1 = ({ roles, userId }) => {
     const apiKey = process.env.REACT_APP_GOOGLE_API_KEY;
     const { isLoaded } = useJsApiLoader({
         id: 'google-map-script',
@@ -91,7 +91,7 @@ const GoogleMapSection1 = () => {
                 throw new Error('Failed to fetch nearby drivers');
             }
             const data = await response.json();
-            
+
             const driverDetails = await Promise.all(
                 data.drivers.map(async (driver) => {
                     try {

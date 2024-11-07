@@ -46,7 +46,7 @@ const Search = ({ roles, userId, userName, emails}) => {
             </div>
             {/* Render GoogleMapSection to show the map */}
             <div className="col-md-8 mt-4 p-4">
-              <GoogleMapSection1 />
+              <GoogleMapSection1 roles={roles} userId={userId} />
             </div>
           </div>
         </div>
