@@ -1,275 +1,316 @@
-import React, { useState } from 'react';
-import './AdminApp.css'
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import './AdminApp.css';
 import {
   BsFillArchiveFill, BsFillGrid3X3GapFill,
   BsPeopleFill, BsFillBellFill
-}
-  from 'react-icons/bs';
-import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line }
-  from 'recharts';
+} from 'react-icons/bs';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
 import AdminApp from './AdminApp';
 import { Link } from 'react-router-dom';
 
 function AdminHome() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const data = [
-    {
-      name: 'January',
-      cancelled: 4000,
-      Approved: 2400,
-      amt: 2400,
-    },
-    {
-      name: 'February',
-      cancelled: 3000,
-      Approved: 1398,
-      amt: 2210,
-    },
-    {
-      name: 'March',
-      cancelled: 2000,
-      Approved: 9800,
-      amt: 2290,
-    },
-    {
-      name: 'April',
-      cancelled: 2780,
-      Approved: 3908,
-      amt: 2000,
-    },
-    {
-      name: 'May',
-      cancelled: 1890,
-      Approved: 4800,
-      amt: 2181,
-    },
-    {
-      name: 'June',
-      cancelled: 2390,
-      Approved: 3800,
-      amt: 2500,
-    },
-    {
-      name: 'July',
-      cancelled: 3490,
-      Approved: 4300,
-      amt: 2100,
-    },];
-  // Sample feedback data
-  const [feedbackData, setFeedbackData] = useState([
-    {
-      id: 1,
-      name: 'John Sebiya',
-      email: 'john.sebiya@example.com',
-      comment: 'Great experience using the system!',
-      date: '2024-06-01',
-      role: 'Customer'
-    },
-    {
-      id: 2,
-      name: 'Alice many',
-      email: 'alice.many@example.com',
-      comment: 'The system needs improvement in terms of user interface.',
-      date: '2024-06-02',
-      role: 'Driver'
-    },
-    // Add more feedback objects as needed
-  ]);
+  // State hooks for managing various data and UI states
+  const [searchTerm, setSearchTerm] = useState(''); // Search term for filtering feedback
+  const [feedbackData, setFeedbackData] = useState([]); // Feedback data from the backend
+  const [visibleCount, setVisibleCount] = useState(5); // Number of feedback items to show initially
+  const [subscriptions, setSubscriptions] = useState([]); // Subscription data for charts
+  const [loadingSubscriptions, setLoadingSubscriptions] = useState(true); // Loading state for subscriptions
+  const [errorSubscriptions, setErrorSubscriptions] = useState(null); // Error state for subscriptions
+  const [totalTrips, setTotalTrips] = useState(0); // Total number of trips
+  const [cancelledTrips, setCancelledTrips] = useState(0); // Number of cancelled trips
+  const [completedTrips, setCompletedTrips] = useState(0); // Number of completed trips
+  const [totalPayments, setTotalPayments] = useState(0); // Total payment amount
 
-  // Filtered data based on the search term
+  useEffect(() => {
+    // Fetch feedback data from the backend
+    const fetchFeedback = async () => {
+      try {
+        const response = await axios.get('http://localhost:8085/api/feedback');
+        setFeedbackData(response.data); // Update feedback data state
+      } catch (error) {
+        console.error('Error fetching feedback:', error); // Log errors
+      }
+    };
+
+    // Fetch subscriptions data from the backend
+    const fetchSubscriptions = async () => {
+      try {
+        const response = await axios.get('http://localhost:8085/api/subscriptions');
+        setSubscriptions(response.data); // Update subscriptions data state
+        setLoadingSubscriptions(false); // Update loading state
+      } catch (error) {
+        setErrorSubscriptions('Error fetching subscriptions'); // Update error state
+        setLoadingSubscriptions(false); // Update loading state
+      }
+    };
+
+    // Fetch total trips count from the backend
+    const fetchTotalTrips = async () => {
+      try {
+        const response = await axios.get('http://localhost:8085/api/trips/total');
+        console.log('Total Trips Response:', response.data); // Log the response data
+        setTotalTrips(response.data.total_trips); // Update total trips state
+
+        if (response.data.total_trips === 0) {
+          console.log('No trips found. Consider adding some trips to the database.'); // Log if no trips are found
+        }
+      } catch (error) {
+        console.error('Error fetching total trips:', error.response ? error.response.data : error.message); // Log errors
+      }
+    };
+
+    // Fetch cancelled trips count from the backend
+    const fetchCancelledTrips = async () => {
+      try {
+        const response = await axios.get('http://localhost:8085/api/trips/cancelled');
+        console.log('Cancelled Trips Response:', response.data); // Log the response data
+        setCancelledTrips(response.data.cancelled_trips); // Update cancelled trips state
+
+        if (response.data.cancelled_trips === 0) {
+          console.log('No cancelled trips found.'); // Log if no cancelled trips are found
+        }
+      } catch (error) {
+        console.error('Error fetching cancelled trips:', error.response ? error.response.data : error.message); // Log errors
+      }
+    };
+
+    // Fetch completed trips count from the backend
+    const fetchCompletedTrips = async () => {
+      try {
+        const response = await axios.get('http://localhost:8085/api/trips/completed');
+        console.log('Completed Trips Response:', response.data); // Log the response data
+        setCompletedTrips(response.data.completedTrips); // Update completed trips state
+
+        if (response.data.completedTrips === 0) {
+          console.log('No completed trips found.'); // Log if no completed trips are found
+        }
+      } catch (error) {
+        console.error('Error fetching completed trips:', error.response ? error.response.data : error.message); // Log errors
+      }
+    };
+
+    fetchFeedback();
+    fetchSubscriptions();
+    fetchTotalTrips();
+    fetchCancelledTrips();
+    fetchCompletedTrips();
+  }, []); // Empty dependency array means this effect runs once on mount
+
+  // Fetch total payments amount from the backend
+  useEffect(() => {
+    const fetchTotalPayments = async () => {
+      try {
+        const response = await axios.get('http://localhost:8085/api/trips/payments/total');
+        setTotalPayments(response.data.total_payment); // Update total payments state
+      } catch (error) {
+        console.error('Error fetching total payments:', error.response ? error.response.data : error.message); // Log errors
+      }
+    };
+
+    fetchTotalPayments();
+  }, []); // Empty dependency array means this effect runs once on mount
+
+  // Function to convert createdAt timestamp to formatted date and time
+  const convertTime = (createdAt) => {
+    const date = new Date(createdAt);
+    const formattedDate = date.toLocaleDateString();
+    const formattedTime = date.toLocaleTimeString();
+    return `${formattedDate} ${formattedTime}`;
+  };
+
+  // Filter feedback based on the search term and convert timestamp
   const filteredFeedbackData = feedbackData.filter(feedback =>
-    feedback.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    feedback.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    feedback.comment.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    feedback.date.includes(searchTerm) ||
+    feedback.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    feedback.createdAt.includes(searchTerm) ||
     feedback.role.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  ).map(feedback => ({
+    ...feedback,
+    createdAt: convertTime(feedback.createdAt) // Convert createdAt to formatted date and time
+  }));
+
+  // Function to show more items in the feedback list
+  const handleViewMore = () => {
+    setVisibleCount(prevCount => prevCount + 5); // Increase visible count by 5
+  };
+
+  // Transform subscriptions data for chart visualization
+  const transformData = () => {
+    const monthlyData = Array.from({ length: 12 }, (_, i) => ({
+      name: new Date(0, i).toLocaleString('default', { month: 'long' }), // Generate month names
+      cancelled: 0,
+      Approved: 0,
+    }));
+
+    subscriptions.forEach(sub => {
+      const month = new Date(sub.created_at).getMonth();
+      if (sub.statuses === 1) {
+        monthlyData[month].Approved += sub.amount; // Accumulate approved amounts
+      } else {
+        monthlyData[month].cancelled += sub.amount; // Accumulate cancelled amounts
+      }
+    });
+
+    return monthlyData;
+  };
+
+  const chartData = transformData(); // Prepare data for charts
 
   return (
     <AdminApp>
-    <main className='main-container' >
-      <div className='main-cards-admin' >
-{/* import { Link } from 'react-router-dom';
+      <main className='main-container'>
+        <div className="row g-4">
+          {/* Card for Total Number of Trips */}
+          <div className="col-md-3">
+            <div className="card bg-primary text-white rounded-3 shadow-sm">
+              <div className="card-body">
+                <div className="d-flex align-items-center justify-content-between">
+                  <div>
+                    <h5 className="card-title mb-2">Total No Of Trips</h5>
+                    <h2 className="card-text fw-bold">{totalTrips}</h2>
+                  </div>
+                  <BsFillArchiveFill className="card-icon fs-1" />
+                </div>
+              </div>
+              <div className="card-footer bg-primary border-0">
+                <Link to="/trip" className="text-white text-decoration-none">
+                  View Details
+                </Link>
+              </div>
+            </div>
+          </div>
 
-// ... */}
+          {/* Card for Cancelled Trips */}
+          <div className="col-md-3">
+            <div className="card bg-danger text-white rounded-3 shadow-sm">
+              <div className="card-body">
+                <div className="d-flex align-items-center justify-content-between">
+                  <div>
+                    <h5 className="card-title mb-2">Cancelled Trips</h5>
+                    <h2 className="card-text fw-bold">{cancelledTrips}</h2>
+                  </div>
+                  <BsFillGrid3X3GapFill className="card-icon fs-1" />
+                </div>
+              </div>
+              <div className="card-footer bg-danger border-0">
+                <Link to="/cancelled" className="text-white text-decoration-none">
+                  View Details
+                </Link>
+              </div>
+            </div>
+          </div>
 
-<div className='card-admin'>
-  <Link to={'/trip'} className='text-white text-decoration-none'>
-    <div className='card-inner-admin'>
-      <h3>Total No Of Trips</h3>
-      <BsFillArchiveFill className='card_icon' />
-    </div>
-    <h1 className='lule'>28</h1>
-  </Link>
-</div>
+          {/* Card for Completed Trips */}
+          <div className="col-md-3">
+            <div className="card bg-success text-white rounded-3 shadow-sm">
+              <div className="card-body">
+                <div className="d-flex align-items-center justify-content-between">
+                  <div>
+                    <h5 className="card-title mb-2">Completed Trips</h5>
+                    <h2 className="card-text fw-bold">{completedTrips}</h2>
+                  </div>
+                  <BsPeopleFill className="card-icon fs-1" />
+                </div>
+              </div>
+              <div className="card-footer bg-success border-0">
+                <Link to="/completed" className="text-white text-decoration-none">
+                  View Details
+                </Link>
+              </div>
+            </div>
+          </div>
 
-<div className='card-admin'>
-  <Link to={'/cancelled'} className='text-white text-decoration-none'>
-    <div className='card-inner-admin'>
-      <h3>Cancelled Trips</h3>
-      <BsFillGrid3X3GapFill className='card_icon' />
-    </div>
-    <h1 className='lule text-black'>3</h1>
-  </Link>
-</div>
-
-<div className='card-admin'>
-  <Link to={'/trip'} className='text-white text-decoration-none'>
-    <div className='card-inner-admin'>
-      <h3>Completed Trips</h3>
-      <BsPeopleFill className='card_icon' />
-    </div>
-    <h1 className='lule'>25</h1>
-  </Link>
-</div>
-
-<div className='card-admin'>
-  <Link to={'/earnings'} className='text-white text-decoration-none'>
-    <div className='card-inner-admin'>
-      <h3>Revenue from 3 Trips</h3>
-      <BsFillBellFill className='card_icon' />
-    </div>
-  </Link>
-
-
-          <h1 className='lule'>R420</h1>
+          {/* Card for Total Payments */}
+          <div className="col-md-3">
+            <div className="card bg-warning text-dark rounded-3 shadow-sm">
+              <div className="card-body">
+                <div className="d-flex align-items-center justify-content-between">
+                  <div>
+                    <h5 className="card-title mb-2">Total Payments</h5>
+                    <h2 className="card-text fw-bold">${totalPayments.toFixed(2)}</h2>
+                  </div>
+                  <BsFillBellFill className="card-icon fs-1" />
+                </div>
+              </div>
+              <div className="card-footer bg-warning border-0">
+                <Link to="/payments" className="text-dark text-decoration-none">
+                  View Details
+                </Link>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div className='charts'>
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            width={500}
-            height={300}
-            data={data}
-            margin={{
-              top: 5,
-              right: 30,
-              left: 20,
-              bottom: 5,
-            }}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Bar dataKey="Approved" fill="#8884d8" />
-            <Bar dataKey="cancelled" fill="#82ca9d" />
-          </BarChart>
-        </ResponsiveContainer>
+      
 
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart
-            width={500}
-            height={300}
-            data={data}
-            margin={{
-              top: 5,
-              right: 30,
-              left: 20,
-              bottom: 5,
-            }}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Line type="monotone" dataKey="Approved" stroke="#8884d8" activeDot={{ r: 8 }} />
-            <Line type="monotone" dataKey="cancelled" stroke="#82ca9d" />
-          </LineChart>
-        </ResponsiveContainer>
+        {/* Charts Section */}
+        <div className="charts-section mt-5">
+          <h4 className="mb-4">Subscription Analytics</h4>
+          {loadingSubscriptions ? (
+            <p>Loading subscriptions data...</p>
+          ) : errorSubscriptions ? (
+            <p>{errorSubscriptions}</p>
+          ) : (
+            <div className="row">
+              <div className="col-md-6">
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="Approved" fill="#82ca9d" />
+                    <Bar dataKey="cancelled" fill="#ff6347" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
 
-      </div>
-      <div >
-        <main className='main-container col-md-8 mx-md-auto'>
-          <div className="container my-5" style={{ backgroundColor: 'white' }}>
-            <div className="card-body text-center mt-5">
-              <h4 className="card-title text-dark">Recent reviews</h4>
-              <p className="card-text text-dark">Click on details for reviewing full feedback</p>
-              <div className="input-group" style={{ maxWidth: '250px' }}>
-                <input
-                  type="text"
-                  className="form-control form-control-sm"
-                  placeholder="Search..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                <button className="btn btn-outline-primary" type="button">Search</button>
+              <div className="col-md-6">
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="Approved" stroke="#82ca9d" />
+                    <Line type="monotone" dataKey="cancelled" stroke="#ff6347" />
+                  </LineChart>
+                </ResponsiveContainer>
               </div>
             </div>
-            <div className="table-responsive">
-              <table className="table table-striped">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Comment</th>
-                    <th>Date</th>
-                    <th>Role</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredFeedbackData.map(feedback => (
-                    <tr key={feedback.id}>
-                      <td>{feedback.id}</td>
-                      <td>{feedback.name}</td>
-                      <td>{feedback.email}</td>
-                      <td>{feedback.comment}</td>
-                      <td>{feedback.date}</td>
-                      <td>{feedback.role}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            {/* Large modal
-        <div className="modal fade bd-example-modal-lg" tabIndex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
-          <div className="modal-dialog modal-lg">
-            <div className="modal-content">
-              <div className="card-body text-center">
-                <h4 className="card-title">List of active drivers</h4>
-                <p className="card-text">With supporting text below as a natural lead-in to additional content.</p>
-              </div>
-              <div className="card-admin col-8 offset-2 my-2 p-3">
-                <form>
-                  <div className="form-group">
-                    <label htmlFor="listname">List name</label>
-                    <input type="text" className="form-control" name="listname" id="listname" placeholder="Enter your listname" />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="datepicker">Deadline</label>
-                    <input type="text" className="form-control" name="datepicker" id="datepicker" placeholder="Pick up a date" />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="datepicker">Add a list item</label>
-                    <div className="input-group">
-                      <input type="text" className="form-control" placeholder="Add an item" aria-label="Search for..." />
-                      <span className="input-group-btn">
-                        <button className="btn btn-secondary" type="button">Go!</button>
-                      </span>
-                    </div>
-                  </div>
-                  <div className="form-group text-center">
-                    <button type="submit" className="btn btn-block btn-primary">Sign in</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div> */}
-          </div>
-        </main>
-      </div>
+          )}
+        </div>
+          {/* Feedback Section */}
+          <div className="feedback-section">
+          <h4 className="mb-4">Recent Feedback</h4>
+          <input
+            type="text"
+            className="form-control mb-3"
+            placeholder="Search feedback..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)} // Update search term
+          />
 
+          <ul className="list-group">
+            {filteredFeedbackData.slice(0, visibleCount).map((feedback) => (
+              <li key={feedback.id} className="list-group-item">
+                <p className="mb-1"><strong>{feedback.role}</strong>: {feedback.content}</p>
+                <small className="text-muted">{feedback.createdAt}</small>
+              </li>
+            ))}
+          </ul>
 
-
-    </main>
+          {filteredFeedbackData.length > visibleCount && (
+            <button className="btn btn-primary mt-3" onClick={handleViewMore}>
+              View More
+            </button>
+          )}
+        </div>
+      </main>
     </AdminApp>
-
-
   );
 }
+
 export default AdminHome;

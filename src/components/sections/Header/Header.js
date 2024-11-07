@@ -2,7 +2,7 @@ import React from 'react';
 import demoScreen from '../../../assets/img/nthome.mp4'
 import appBedge from '../../../assets/img/app-store-badge.svg'
 import playBedge from '../../../assets/img/google-play-badge.svg'
-import portrait_black from '../../../assets/img/portrait_black.png'
+// import portrait_black from '../../../assets/img/portrait_black.png'
 const Header = () => {
     return (
         <header className="masthead">
@@ -11,7 +11,7 @@ const Header = () => {
                     <div className="col-lg-6">
                         {/* Mashead text and app badges */}
                         <div className="mb-5 mb-lg-0 text-center text-lg-start">
-                            <h1 className="display-1 lh-1 mb-3">Ride Smart, just Send Me!</h1>
+                            <h1 className="display-1 lh-1 text-dark text-start mb-3">Ride Smart, just Send Me!</h1>
                             <p className="lead fw-normal text-muted mb-5">Experience peace of mind with our secure and affordable rides. We prioritize your safety while delivering unbeatable prices tailored to your needs. Enjoy effortless journeys with us today!</p>
                             <div className="d-flex flex-column flex-lg-row align-items-center">
                                 <a className="me-lg-3 mb-4 mb-lg-0" href="#!"><img className="app-badge" src={playBedge} alt="..." /></a>

@@ -4,20 +4,19 @@ import axios from 'axios';
 import { BsStarFill, BsStarHalf, BsStar } from 'react-icons/bs';
 import AdminApp from './AdminApp';
 
-
 const RidesRatings = () => {
     const [ratings, setRatings] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
-        axios.get('http://localhost:8085/user-trip-details-driver')
+        axios.get('http://localhost:8085/user-trip-rating-customer')
             .then(response => {
                 const data = response.data.map((trip, index) => ({
                     no: index + 1,
-                    rideId: trip.trip_id,
-                    driverName: trip.driver_name ? `${trip.driver_name} ${trip.driver_lastName}` : 'Unknown Driver',
-                    riderName: trip.customer_name ? `${trip.customer_name} ${trip.customer_lastName}` : 'Unknown Rider',
-                    ratingDateTime: trip.currentDate,
+                    rideId: trip.trip_id || '',
+                    driverName: trip.driver_name ? `${trip.driver_name} ${trip.driver_lastName || ''}` : 'Unknown Driver',
+                    riderName: trip.customer_name ? `${trip.customer_name} ${trip.customer_lastName || ''}` : 'Unknown Rider',
+                    ratingDateTime: trip.currentDate ? new Date(trip.currentDate).toLocaleString() : '',
                     comments: trip.customer_feedback || '',
                     rating: trip.customer_rating ?? 0,
                 }));
@@ -74,8 +73,8 @@ const RidesRatings = () => {
                     <tr>
                         <th>No</th>
                         <th>Ride ID</th>
-                        <th>Driver Name (From)</th>
-                        <th>Rider Name (To)</th>
+                        <th>Rider Name (From)</th>
+                        <th>Driver Name (To)</th>
                         <th>Rating</th>
                         <th>Rating Date & Time</th>
                         <th>Comments</th>
@@ -87,8 +86,8 @@ const RidesRatings = () => {
                         <tr key={rating.no}>
                             <td>{rating.no}</td>
                             <td>{rating.rideId}</td>
-                            <td>{rating.driverName}</td>
                             <td>{rating.riderName}</td>
+                            <td>{rating.driverName}</td>
                             <td>
                                 {renderStars(rating.rating)} ({rating.rating}/5)
                             </td>

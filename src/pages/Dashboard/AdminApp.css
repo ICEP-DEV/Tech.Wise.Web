@@ -499,4 +499,70 @@ body {
 .dropdown-item:hover {
     background-color: #f1f1f1;
 }
-/* side bar togler */
+/* styling notification page */
+.messagePageContainer {
+  padding: 20px;
+  background-color: #f4f4f4;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.messagePageTitle {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.notificationsList {
+  list-style-type: none;
+  padding: 0;
+}
+
+.notificationItem {
+  padding: 15px;
+  margin: 10px 0;
+  background-color: #fff;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+  cursor: pointer;
+}
+
+.notificationItem:hover {
+  background-color: #e0e0e0;
+}
+
+.notificationUnread {
+  border-left: 5px solid #007bff;
+}
+
+.notificationRead {
+  opacity: 0.6;
+}
+
+.selectedMessageContainer {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #fff;
+  border-radius: 5px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.selectedMessageSubject {
+  font-size: 20px;
+  color: #333;
+}
+
+.deleteButton {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.deleteButton:hover {
+  background-color: #c82333;
+}
+
+/* style the notification date hovering */

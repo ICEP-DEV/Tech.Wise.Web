@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import toast, { Toaster } from 'react-hot-toast';
 import AdminApp from './AdminApp';
 
 const VehicleType = () => {
@@ -19,9 +20,11 @@ const VehicleType = () => {
         axios.get('http://localhost:8085/vehicles')
             .then(response => {
                 setVehicles(response.data);
+                // toast.success('Vehicles fetched successfully!');
             })
             .catch(error => {
                 console.error('Error fetching vehicles:', error);
+                toast.error('Error fetching vehicles');
             });
     }, []);
 
@@ -52,9 +55,11 @@ const VehicleType = () => {
                     vehicle.id === editVehicleId ? { ...vehicle, ...formData } : vehicle
                 ));
                 setEditVehicleId(null);
+                toast.success('Vehicle updated successfully!');
             })
             .catch(error => {
                 console.error('Error updating vehicle:', error);
+                toast.error('Error updating vehicle');
             });
     };
 
@@ -66,15 +71,18 @@ const VehicleType = () => {
         axios.delete(`http://localhost:8085/delete_vehicle/${id}`)
             .then(response => {
                 setVehicles(vehicles.filter(vehicle => vehicle.id !== id));
+                toast.success('Vehicle deleted successfully!');
             })
             .catch(error => {
                 console.error('Error deleting vehicle:', error);
+                toast.error('Error deleting vehicle');
             });
     };
 
     return (
         <AdminApp>
             <div className="container py-4 mb-5 mt-4">
+                <Toaster /> {/* Ensure Toaster is included */}
                 <div className="row">
                     <div className="col-12 mb-4">
                         <h2 className="text-dark">Vehicle Types</h2>

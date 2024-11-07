@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import toast, { Toaster } from 'react-hot-toast';
+import AdminApp from './AdminApp';
 
 const SiteSettings = () => {
     const [generalInfo, setGeneralInfo] = useState({
@@ -27,7 +29,6 @@ const SiteSettings = () => {
     });
 
     useEffect(() => {
-        // Fetch current settings when component mounts
         fetchCurrentSettings();
     }, []);
 
@@ -61,6 +62,7 @@ const SiteSettings = () => {
 
         } catch (error) {
             console.error('Error fetching settings:', error);
+            toast.error('Error fetching settings');
         }
     };
 
@@ -86,265 +88,195 @@ const SiteSettings = () => {
             ...fareSettings
         };
     
-        console.log('Saving settings with data:', settingsData); // Add this line to inspect data
-    
         try {
             const response = await axios.post('http://localhost:8085/api/update_settings', settingsData);
             console.log('Settings saved:', response.data);
-            // Optionally, update state or show success message
+            toast.success('Settings saved successfully');
         } catch (error) {
             console.error('Error saving settings:', error);
-            // Optionally, update state to show error message
+            toast.error('Error saving settings');
         }
     };
-    
 
     return (
-        <div className="container py-5 mb-5 mt-5">
-            <h2 className="mb-4 text-dark">Site Settings</h2>
-            <div className="d-flex justify-content-between mb-3">
-                <div><Link to="/adminapp" className="btn btn-outline-primary float-left py- mb-">Back</Link></div>
-            </div>
+        <AdminApp>
+            <div className="container py-5 mb-5 mt-5">
+                <Toaster />
+                <h2 className="mb-4 text-dark">Site Settings</h2>
+                <div className="d-flex justify-content-between mb-3">
+                    <div><Link to="/adminapp" className="btn btn-outline-primary float-left py- mb-">Back</Link></div>
+                </div>
 
-            <div className="mb-4">
-                <h4>General Information</h4>
-                <div className="form-group">
-                    <h6 className="form-label">Company Name</h6>
-                    <input
-                        type="text"
-                        id="companyName"
-                        name="companyName"
-                        className="form-control"
-                        value={generalInfo.companyName}
-                        onChange={handleGeneralInfoChange}
-                    />
+                <div className="mb-4">
+                    <h4>General Information</h4>
+                    <div className="form-group">
+                        <h6 className="form-label">Company Name</h6>
+                        <input
+                            type="text"
+                            id="companyName"
+                            name="companyName"
+                            className="form-control"
+                            value={generalInfo.companyName}
+                            onChange={handleGeneralInfoChange}
+                        />
+                    </div>
+                    <div className="form-group mt-3">
+                        <h6 className="form-label">Support Email</h6>
+                        <input
+                            type="email"
+                            id="supportEmail"
+                            name="supportEmail"
+                            className="form-control"
+                            value={generalInfo.supportEmail}
+                            onChange={handleGeneralInfoChange}
+                        />
+                    </div>
+                    <div className="form-group mt-3">
+                        <h6 className="form-label">Support Phone</h6>
+                        <input
+                            type="text"
+                            id="supportPhone"
+                            name="supportPhone"
+                            className="form-control"
+                            value={generalInfo.supportPhone}
+                            onChange={handleGeneralInfoChange}
+                        />
+                    </div>
                 </div>
-                <div className="form-group mt-3">
-                    <h6 className="form-label">Support Email</h6>
-                    <input
-                        type="email"
-                        id="supportEmail"
-                        name="supportEmail"
-                        className="form-control"
-                        value={generalInfo.supportEmail}
-                        onChange={handleGeneralInfoChange}
-                    />
-                </div>
-                <div className="form-group mt-3">
-                    <h6 className="form-label">Support Phone</h6>
-                    <input
-                        type="text"
-                        id="supportPhone"
-                        name="supportPhone"
-                        className="form-control"
-                        value={generalInfo.supportPhone}
-                        onChange={handleGeneralInfoChange}
-                    />
-                </div>
-            </div>
 
-            <div className="mb-4">
-                <h4>Notification Preferences</h4>
-                <div className="form-group form-check">
-                    <input
-                        type="checkbox"
-                        id="driverNotifications"
-                        name="driverNotifications"
-                        className="form-check-input"
-                        checked={notifications.driverNotifications}
-                        onChange={handleNotificationsChange}
-                    />
-                    <label className="form-check-label" htmlFor="driverNotifications">Driver Notifications</label>
+                <div className="mb-4">
+                    <h4>Notification Preferences</h4>
+                    <div className="form-group form-check">
+                        <input
+                            type="checkbox"
+                            id="driverNotifications"
+                            name="driverNotifications"
+                            className="form-check-input"
+                            checked={notifications.driverNotifications}
+                            onChange={handleNotificationsChange}
+                        />
+                        <label className="form-check-label text-dark" htmlFor="driverNotifications">Driver Notifications</label>
+                    </div>
+                    <div className="form-group form-check">
+                        <input
+                            type="checkbox"
+                            id="riderNotifications"
+                            name="riderNotifications"
+                            className="form-check-input"
+                            checked={notifications.riderNotifications}
+                            onChange={handleNotificationsChange}
+                        />
+                        <label className="form-check-label text-dark" htmlFor="riderNotifications">Rider Notifications</label>
+                    </div>
+                    <div className="form-group form-check">
+                        <input
+                            type="checkbox"
+                            id="promoNotifications"
+                            name="promoNotifications"
+                            className="form-check-input"
+                            checked={notifications.promoNotifications}
+                            onChange={handleNotificationsChange}
+                        />
+                        <label className="form-check-label text-dark" htmlFor="promoNotifications">Promotional Notifications</label>
+                    </div>
                 </div>
-                <div className="form-group form-check">
-                    <input
-                        type="checkbox"
-                        id="riderNotifications"
-                        name="riderNotifications"
-                        className="form-check-input"
-                        checked={notifications.riderNotifications}
-                        onChange={handleNotificationsChange}
-                    />
-                    <label className="form-check-label" htmlFor="riderNotifications">Rider Notifications</label>
-                </div>
-                <div className="form-group form-check">
-                    <input
-                        type="checkbox"
-                        id="promoNotifications"
-                        name="promoNotifications"
-                        className="form-check-input"
-                        checked={notifications.promoNotifications}
-                        onChange={handleNotificationsChange}
-                    />
-                    <label className="form-check-label" htmlFor="promoNotifications">Promotional Notifications</label>
-                </div>
-            </div>
 
-            <div className="mb-4">
-                <h4>Ride Fare Settings</h4>
-                <div className="form-group mt-3">
-                    <h6 className="form-label">Per KM Rate Nthome Black (R)</h6>
-                    <input
-                        type="number"
-                        id="perKMRateBlack"
-                        name="perKMRateBlack"
-                        className="form-control"
-                        value={fareSettings.perKMRateBlack}
-                        onChange={handleFareSettingsChange}
-                    />
+                <div className="mb-4">
+                    <h4>Ride Fare Settings</h4>
+                    <div className="form-group mt-3">
+                        <h6 className="form-label">Per KM Rate Nthome Black (R)</h6>
+                        <input
+                            type="number"
+                            id="perKMRateBlack"
+                            name="perKMRateBlack"
+                            className="form-control"
+                            value={fareSettings.perKMRateBlack}
+                            onChange={handleFareSettingsChange}
+                        />
+                    </div>
+                    <div className="form-group mt-3">
+                        <h6 className="form-label">Per KM Rate Nthome X (R)</h6>
+                        <input
+                            type="number"
+                            id="perKMRateX"
+                            name="perKMRateX"
+                            className="form-control"
+                            value={fareSettings.perKMRateX}
+                            onChange={handleFareSettingsChange}
+                        />
+                    </div>
+                    <h4 className="mt-3">Driver Fare Settings</h4>
+                    <div className="form-group mt-3">
+                        <h6 className="form-label">Working Hours (Daily)</h6>
+                        <input
+                            type="number"
+                            id="workingHours"
+                            name="workingHours"
+                            className="form-control"
+                            value={fareSettings.workingHours}
+                            onChange={handleFareSettingsChange}
+                        />
+                    </div>
+                    <div className="form-group mt-3">
+                        <h6 className="form-label">Base Fare Nthome Black (R)</h6>
+                        <input
+                            type="number"
+                            id="baseFareBlack"
+                            name="baseFareBlack"
+                            className="form-control"
+                            value={fareSettings.baseFareBlack}
+                            onChange={handleFareSettingsChange}
+                        />
+                    </div>
+                    <div className="form-group mt-3">
+                        <h6 className="form-label">Base Fare Nthome X (R)</h6>
+                        <input
+                            type="number"
+                            id="baseFareX"
+                            name="baseFareX"
+                            className="form-control"
+                            value={fareSettings.baseFareX}
+                            onChange={handleFareSettingsChange}
+                        />
+                    </div>
+                    <div className="form-group mt-3">
+                        <h6 className="form-label">Per Week Rate (R)</h6>
+                        <input
+                            type="number"
+                            id="perWeekRate"
+                            name="perWeekRate"
+                            className="form-control"
+                            value={fareSettings.perWeekRate}
+                            onChange={handleFareSettingsChange}
+                        />
+                    </div>
+                    <div className="form-group mt-3">
+                        <h6 className="form-label">Per Month Rate (R)</h6>
+                        <input
+                            type="number"
+                            id="perMonthRate"
+                            name="perMonthRate"
+                            className="form-control"
+                            value={fareSettings.perMonthRate}
+                            onChange={handleFareSettingsChange}
+                        />
+                    </div>
+                    <div className="form-group mt-3">
+                        <h6 className="form-label">Cancellation Fee</h6>
+                        <input
+                            type="number"
+                            id="cancellationFee"
+                            name="cancellationFee"
+                            className="form-control"
+                            value={fareSettings.cancellationFee}
+                            onChange={handleFareSettingsChange}
+                        />
+                    </div>
                 </div>
-                <div className="form-group mt-3">
-                    <h6 className="form-label">Per KM Rate Nthome X (R)</h6>
-                    <input
-                        type="number"
-                        id="perKMRateX"
-                        name="perKMRateX"
-                        className="form-control"
-                        value={fareSettings.perKMRateX}
-                        onChange={handleFareSettingsChange}
-                    />
-                </div>
-                <h4 className="mt-3">Driver Fare Settings</h4>
-                <div className="form-group mt-3">
-                    <h6 className="form-label">Working Hours (Daily)</h6>
-                    <input
-                        type="number"
-                        id="workingHours"
-                        name="workingHours"
-                        className="form-control"
-                        value={fareSettings.workingHours}
-                        onChange={handleFareSettingsChange}
-                    />
-                </div>
-                <div className="form-group mt-3">
-                    <h6 className="form-label">Base Fare Nthome Black (R)</h6>
-                    <input
-                        type="number"
-                        id="baseFareBlack"
-                        name="baseFareBlack"
-                        className="form-control"
-                        value={fareSettings.baseFareBlack}
-                        onChange={handleFareSettingsChange}
-                    />
-                </div>
-                <div className="form-group mt-3">
-                    <h6 className="form-label">Base Fare Nthome X (R)</h6>
-                    <input
-                        type="number"
-                        id="baseFareX"
-                        name="baseFareX"
-                        className="form-control"
-                        value={fareSettings.baseFareX}
-                        onChange={handleFareSettingsChange}
-                    />
-                </div>
-                <div className="form-group mt-3">
-                    <h6 className="form-label">Per Week Rate (R)</h6>
-                    <input
-                        type="number"
-                        id="perWeekRate"
-                        name="perWeekRate"
-                        className="form-control"
-                        value={fareSettings.perWeekRate}
-                        onChange={handleFareSettingsChange}
-                    />
-                </div>
-                <div className="form-group mt-3">
-                    <h6 className="form-label">Per Month Rate (R)</h6>
-                    <input
-                        type="number"
-                        id="perMonthRate"
-                        name="perMonthRate"
-                        className="form-control"
-                        value={fareSettings.perMonthRate}
-                        onChange={handleFareSettingsChange}
-                    />
-                </div>
-                <div className="form-group mt-3">
-                    <h6 className="form-label">Cancellation Fee (R)</h6>
-                    <input
-                        type="number"
-                        id="cancellationFee"
-                        name="cancellationFee"
-                        className="form-control"
-                        value={fareSettings.cancellationFee}
-                        onChange={handleFareSettingsChange}
-                    />
-                </div>
-            </div>
 
-            <button className="btn btn-primary mt-3" onClick={handleSaveSettings}>Save Settings</button>
-
-            <h2 className="mb-4 text-dark mt-5">Current Settings</h2>
-            <div className="table-responsive">
-                <table className="table">
-                    <thead>
-                        <tr>
-                            <th>Setting</th>
-                            <th>Value</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Company Name</td>
-                            <td>{generalInfo.companyName}</td>
-                        </tr>
-                        <tr>
-                            <td>Support Email</td>
-                            <td>{generalInfo.supportEmail}</td>
-                        </tr>
-                        <tr>
-                            <td>Support Phone</td>
-                            <td>{generalInfo.supportPhone}</td>
-                        </tr>
-                        <tr>
-                            <td>Driver Notifications</td>
-                            <td>{notifications.driverNotifications ? 'Enabled' : 'Disabled'}</td>
-                        </tr>
-                        <tr>
-                            <td>Rider Notifications</td>
-                            <td>{notifications.riderNotifications ? 'Enabled' : 'Disabled'}</td>
-                        </tr>
-                        <tr>
-                            <td>Promo Notifications</td>
-                            <td>{notifications.promoNotifications ? 'Enabled' : 'Disabled'}</td>
-                        </tr>
-                        <tr>
-                            <td>Per KM Rate Nthome Black (R)</td>
-                            <td>{fareSettings.perKMRateBlack}</td>
-                        </tr>
-                        <tr>
-                            <td>Per KM Rate Nthome X (R)</td>
-                            <td>{fareSettings.perKMRateX}</td>
-                        </tr>
-                        <tr>
-                            <td>Working Hours (Daily)</td>
-                            <td>{fareSettings.workingHours}</td>
-                        </tr>
-                        <tr>
-                            <td>Base Fare Nthome Black (R)</td>
-                            <td>{fareSettings.baseFareBlack}</td>
-                        </tr>
-                        <tr>
-                            <td>Base Fare Nthome X (R)</td>
-                            <td>{fareSettings.baseFareX}</td>
-                        </tr>
-                        <tr>
-                            <td>Per Week Rate (R)</td>
-                            <td>{fareSettings.perWeekRate}</td>
-                        </tr>
-                        <tr>
-                            <td>Per Month Rate (R)</td>
-                            <td>{fareSettings.perMonthRate}</td>
-                        </tr>
-                        <tr>
-                            <td>Cancellation Fee (R)</td>
-                            <td>{fareSettings.cancellationFee}</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <button className="btn btn-primary" onClick={handleSaveSettings}>Save Settings</button>
             </div>
-        </div>
+        </AdminApp>
     );
 };
 

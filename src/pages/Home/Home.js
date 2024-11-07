@@ -6,6 +6,7 @@ import BasicFeatures from '../../components/sections/basicFeatures/BasicFeatures
 import CallToAction from '../../components/sections/callToAction/CallToAction'
 import AppBadge from '../../components/sections/appBadge/AppBadge'
 import Questions from '../../components/sections/questions/questions';
+import ScrollToTopButton from '../../components/sections/ScrollToTop/ScrollToTopButton';
 
 const Home = () => {
   return (
@@ -16,8 +17,8 @@ const Home = () => {
         <AppBadge /> 
          <BasicFeatures /> 
         <CallToAction />
-      
         <Questions />
+        <ScrollToTopButton />
     </div>
   )
 }

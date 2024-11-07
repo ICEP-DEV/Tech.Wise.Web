@@ -21,11 +21,16 @@ import logout_icon from './logout_icon.png'
 import parcel_icon from './parcel_icon.png'
 import profile1 from './profile1.png'
 import profile2 from './profile2.jpg'
-import profile from './requester.jpg'
+import profile from './requester.PNG'
 import img2 from './img2.jpg'
 import img3 from './img3.jpg'
 import img4 from './contact.jpg'
 import logoNthome from './logo_nthom.png'
+import trips from './trips.jpg'
+import tripmap from './tripmap.jpg'
+import tripmap1 from './tripmap.png'
+import tripmap2 from './tripmap2.png'
+import carDriver from './car.png'
 
 
 
@@ -57,7 +62,12 @@ export const assets = {
     img2,
     img3,
     img4,
-    logoNthome
+    logoNthome,
+    trips,
+    tripmap,
+    tripmap1,
+    tripmap2,
+    carDriver
     
 }
 

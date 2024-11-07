@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
 import { IoIosCall, IoIosMail, IoLogoFacebook, IoLogoTwitter, IoLogoInstagram } from 'react-icons/io';
-
+import { format } from 'date-fns-tz';
+import toast, { Toaster } from 'react-hot-toast';
 const Contact = ({ emails }) => {
     const navigate = useNavigate();
 
@@ -50,16 +51,26 @@ const Contact = ({ emails }) => {
         e.preventDefault();
 
         if (!validateForm()) {
+            toast.error("Please correct the errors in the form.");
             return;
         }
+  
 
         try {
+            // Get the current date in the South African time zone
+            const currentDate = format(new Date(), 'yyyy-MM-dd', { timeZone: 'Africa/Johannesburg' });
+
             const formData = {
                 ...values,
-                email: emails || values.email // Use provided email if logged in, otherwise use form input
+                email: emails || values.email, // Use provided email if logged in, otherwise use form input
+                contact_date: currentDate // Include the current date in the form data
             };
+
             await axios.post('http://localhost:8085/contact', formData);
-            navigate('/thankyou');
+            toast.success("Message sent successfully!");
+            setTimeout(() => {
+                navigate('/thankyou');
+            }, 2000);
         } catch (error) {
             console.error('Error sending message:', error);
         }
@@ -92,6 +103,7 @@ const Contact = ({ emails }) => {
 
     return (
         <>
+            <Toaster />
             <div className="contact-us-hero-banner">
                 <div className="overlay"></div>
                 <div className="text-container">
@@ -102,7 +114,7 @@ const Contact = ({ emails }) => {
                 <div className='row'>
                     <div className='col-md-6 py-5 bg-light'>
                         <div className='container'>
-                            <h1 className='display-4'>Nthome Courier</h1>
+                            <h1 className='display-4 text-dark'>Nthome Courier</h1>
                             <div className='card'>
                                 <div className='card-body'>
                                     <h5 className='card-title'>Address:</h5>
@@ -147,19 +159,19 @@ const Contact = ({ emails }) => {
                     <div className='col-md-6'>
                         <div className='container'>
                             <form onSubmit={handleSubmit} className="py-5 px-4 rounded-lg shadow-lg bg-white">
-                                    <div className="mb-4">
-                                        <label htmlFor="email" className="block text-gray-700 text-sm font-semibold mb-2">Email</label>
-                                        <input
-                                            type="email"
-                                            id="email"
-                                            name="email"
-                                            placeholder="Your Email"
-                                            className={`border ${errors.email ? 'border-danger' : 'border-gray-300'} form-control rounded-lg py-2 px-3 text-sm md:text-base lg:text-lg focus:outline-none focus:border-blue-500`}
-                                            value={values.email}
-                                            onChange={handleInput}
-                                        />
-                                        {errors.email && <p className="text-danger text-xs italic">{errors.email}</p>}
-                                    </div>
+                                <div className="mb-4">
+                                    <label htmlFor="email" className="block text-gray-700 text-sm font-semibold mb-2">Email</label>
+                                    <input
+                                        type="email"
+                                        id="email"
+                                        name="email"
+                                        placeholder="Your Email"
+                                        className={`border ${errors.email ? 'border-danger' : 'border-gray-300'} form-control rounded-lg py-2 px-3 text-sm md:text-base lg:text-lg focus:outline-none focus:border-blue-500`}
+                                        value={values.email}
+                                        onChange={handleInput}
+                                    />
+                                    {errors.email && <p className="text-danger text-xs italic">{errors.email}</p>}
+                                </div>
                                 <div className="mb-4">
                                     <label htmlFor="subject" className="block text-gray-700 text-sm font-semibold mb-2">Subject</label>
                                     <input
@@ -202,14 +214,13 @@ const Contact = ({ emails }) => {
                                 allowFullScreen
                                 loading="lazy"
                                 referrerPolicy="no-referrer-when-downgrade"
-                                />
-                                </div>
-                            </div>
+                            />
                         </div>
                     </div>
-            </>
-        );
-    };
-    
-    export default Contact;
-    
+                </div>
+            </div>
+        </>
+    );
+};
+
+export default Contact;

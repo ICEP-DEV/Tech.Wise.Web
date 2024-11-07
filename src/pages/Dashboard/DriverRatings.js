@@ -9,14 +9,14 @@ const RidesRatings = () => {
     const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
-        axios.get('http://localhost:8085/user-trip-details')
+        axios.get('http://localhost:8085/user-trip-ratings-driver')
             .then(response => {
                 const data = response.data.map((trip, index) => ({
                     no: index + 1,
-                    rideId: trip.trip_id,
-                    driverName: trip.driver_name ? `${trip.driver_name} ${trip.driver_lastName}` : 'Unknown Driver',
-                    riderName: trip.customer_name ? `${trip.customer_name} ${trip.customer_lastName}` : 'Unknown Rider',
-                    ratingDateTime: trip.currentDate,
+                    rideId: trip.trip_id || '',
+                    driverName: trip.driver_name ? `${trip.driver_name} ${trip.driver_lastName || ''}` : 'Unknown Driver',
+                    riderName: trip.customer_name ? `${trip.customer_name} ${trip.customer_lastName || ''}` : 'Unknown Rider',
+                    ratingDateTime: trip.currentDate ? new Date(trip.currentDate).toLocaleString() : '',
                     comments: trip.driver_feedback || '',
                     rating: trip.driver_ratings ?? 0,
                 }));

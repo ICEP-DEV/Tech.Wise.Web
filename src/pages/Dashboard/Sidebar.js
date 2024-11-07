@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom';
 import './AdminApp.css';
 import {
     BsFillArchiveFill, BsFillGearFill, BsFillGrid3X3GapFill,
-    BsFillMenuButtonWideFill, BsGrid1X2Fill, BsListCheck, BsPeopleFill
+    BsFillMenuButtonWideFill, BsGrid1X2Fill, BsListCheck, BsPeopleFill,
+    BsFillCarFrontFill, BsFillCalendarCheckFill, BsFillPersonFill
 } from 'react-icons/bs';
+import { FaRegStar, FaTachometerAlt, FaBullhorn } from 'react-icons/fa';
 
 function Sidebar({ openSidebarToggle, toggleSidebar }) {
     const [ridesDropdownOpen, setRidesDropdownOpen] = useState(false);
@@ -13,87 +15,85 @@ function Sidebar({ openSidebarToggle, toggleSidebar }) {
         setRidesDropdownOpen(!ridesDropdownOpen);
     };
 
-    // console.log("Sidebar state:", openSidebarToggle); // Debug log
-
     return (
-        
         <aside id="sidebar" className={openSidebarToggle ? "sidebar-responsive" : ""}>
-            {/* <div className='sidebar-title'>
-                <span className='icon close_icon d-flex justify-content-between' onClick={toggleSidebar}>X</span>
-            </div> */}
-            <ul className='sidebar-list mt-5'>
             <div className='sidebar-title'>
-            <span className='icon close_icon   d-flex justify-content-end  mb-2 mt-3  ' onClick={toggleSidebar}>X</span>
+                <span className='icon close_icon d-flex justify-content-end mb-2 mt-3' onClick={toggleSidebar}>X</span>
             </div>
+            <ul className='sidebar-list mt-5'>
                 <li className='sidebar-list-item'>
                     <Link to="/adminapp">
                         <BsGrid1X2Fill className='icon' /> Dashboard
                     </Link>
                 </li>
-                {/* <li className='sidebar-list-item'>
-                    <Link to="/driver">
-                        <BsFillArchiveFill className='icon' /> Driver list
-                    </Link>
-                </li> */}
                 <li className='sidebar-list-item'>
-                    <Link to="/customerRide">
-                        <BsFillGrid3X3GapFill className='icon' /> Customers
+                    <Link to="/driver">
+                        <BsPeopleFill className='icon' /> Drivers
                     </Link>
                 </li>
                 <li className='sidebar-list-item'>
-                    <Link to="/driver">
-                        <BsPeopleFill className='icon' /> Driver
+                    <Link to="/customerRide">
+                        <FaRegStar className='icon' /> Customers
+                    </Link>
+                </li>
+                <li className='sidebar-list-item'>
+                    <Link to="/vehicle">
+                        <BsFillCarFrontFill className='icon' /> Vehicle Type
                     </Link>
                 </li>
                 <li className={`sidebar-list-item ${ridesDropdownOpen ? 'open' : ''}`} onClick={toggleRidesDropdown}>
                     <div className='dropdown-toggle'>
                         <BsListCheck className='icon' />
-                        <span className=" text-dark"> Rides</span>
+                        <span className="text-dark"> Rides</span>
                     </div>
-
                     <ul className='dropdown-menu'>
                         <li className='dropdown-item'>
-                            <Link to="/trip">All Rides</Link>
+                            <Link to="/trip"><BsFillCalendarCheckFill className='icon' /> All Rides</Link>
                         </li>
                         <li className='dropdown-item'>
-                            <Link to="/schedule">Scheduled Rides</Link>
+                            <Link to="/schedule"><BsFillCalendarCheckFill className='icon' /> Scheduled Rides</Link>
                         </li>
                         <li className='dropdown-item'>
-                            <Link to="/completedRides">Completed Rides </Link>
+                            <Link to="/completedRides"><BsFillArchiveFill className='icon' /> Completed Rides</Link>
                         </li>
                         <li className='dropdown-item'>
-                            <Link to="/cancelled">Cancelled Rides</Link>
+                            <Link to="/cancelled"><BsFillArchiveFill className='icon' /> Cancelled Rides</Link>
                         </li>
                     </ul>
                 </li>
                 <li className='sidebar-list-item'>
-                    <Link to="/vehicle">
-                        <BsFillMenuButtonWideFill className='icon' /> Vehicle Type
-                    </Link>
-                </li>
-                <li className='sidebar-list-item'>
                     <Link to="/riderRatings">
-                        <BsFillMenuButtonWideFill className='icon' /> Rider Ratings
+                        <FaRegStar className='icon' /> Rider Ratings
                     </Link>
                 </li>
                 <li className='sidebar-list-item'>
                     <Link to="/driverRatings">
-                        <BsFillMenuButtonWideFill className='icon' /> Driver Ratings
+                        <FaRegStar className='icon' /> Driver Ratings
                     </Link>
                 </li>
                 <li className='sidebar-list-item'>
                     <Link to="/earnings">
-                        <BsFillMenuButtonWideFill className='icon' /> Earning Report
+                        <FaTachometerAlt className='icon' /> Driver Earnings
                     </Link>
                 </li>
                 <li className='sidebar-list-item'>
                     <Link to="/push">
-                        <BsFillMenuButtonWideFill className='icon' /> Push Notification
+                        <FaBullhorn className='icon' /> Push Notification
+                    </Link>
+                </li>
+                <li className='sidebar-list-item'>
+                    <Link to="/subscribers">
+                        <BsFillPersonFill className='icon' /> Subscribers
+                    </Link>
+                </li>
+                <li className='sidebar-list-item'>
+                    <Link to="/adminList">
+                        <BsPeopleFill className='icon' /> Team
                     </Link>
                 </li>
                 <li className='sidebar-list-item'>
                     <Link to="/setting">
-                        <BsFillGearFill className='icon' /> Setting
+                        <BsFillGearFill className='icon' /> Settings
                     </Link>
                 </li>
             </ul>

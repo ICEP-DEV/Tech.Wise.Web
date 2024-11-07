@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { assets } from '../../assets/assets';
 import axios from 'axios';
+import profilePlaceholder from '../../assets/profile2.jpg';
 
 const ProfileUpdate = () => {
   axios.defaults.withCredentials = true;
@@ -16,40 +16,41 @@ const ProfileUpdate = () => {
   });
 
   useEffect(() => {
-    // Fetch customer information from the backend API
     axios.get(`http://localhost:8085/userInfo/${id}`)
       .then(res => {
-        console.log(res);
         const { name, lastName, email, phoneNumber, address } = res.data[0];
         setFormData({ name, lastName, email, phoneNumber, address });
       })
       .catch(error => {
         console.error('Error fetching customer information:', error);
       });
-  }, [id]); // Include id in the dependency array
+  }, [id]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      console.log("Data to be sent:", formData); // Log the data to be sent
-      const response = await axios.put(`http://localhost:8085/edit_customer/${id}`, formData);
-      // console.log(response.data); // Log the response data
-      window.location.href = '/profile-customer'; // Redirect to the profile page
+      await axios.put(`http://localhost:8085/edit_customer/${id}`, formData);
+      window.location.href = '/profile-customer';
     } catch (error) {
       console.log(error);
     }
   };
-  
 
-  
   return (
-    <div className='container py-5 mb-5 '>
-      <div className="container-fluid d-flex flex-column justify-content-between align-items-center customReg-margin-top">
+    <div className='container py-5 mb-5'>
+      <div className="container d-flex justify-content-center align-items-center customReg-margin-top">
         <form onSubmit={handleSubmit} className="p-5 shadow-lg rounded bg-light">
-          <div className="text-center mb-4">
-            <img src={assets.profile2} alt="customer update Profile" className=" rounded-circle w-50" />
-          </div>
-          <h1 className="text-center mb-4">Profile</h1>
+          {/* <div className="text-center mb-4">
+            <img src={profilePlaceholder} alt="Customer Profile" className="rounded-circle w-50"
+                style={{ objectFit: 'cover', width: '150px', height: '150px' }}
+                />
+          </div> */}
+           <div className="d-flex justify-content-between mb-3">
+                    <div>
+                        <Link to="/profile-customer" className="btn btn-outline-primary float-left py- mb-">Back</Link>
+                    </div>
+                </div>
+          <h1 className="text-center text-dark mb-4">Profile Update</h1>
           <div className="row mb-3">
             <div className="col-md-6">
               <div className="form-group">
@@ -100,16 +101,14 @@ const ProfileUpdate = () => {
                   className="form-control"
                   name="address"
                   rows="3"
+                  value={formData.address}
                   onChange={e => setFormData({ ...formData, address: e.target.value })}
-                  value={formData.address}>
-                </textarea>
+                ></textarea>
               </div>
             </div>
           </div>
-          <div className="text-center">
-            {/* <Link to="/profile-customer"> */}
-              <button type="submit" className="btn btn-primary btn-lg px-5">Update</button>
-            {/* </Link> */}
+          <div className="text-center mt-4">
+            <button type="submit" className="btn btn-primary rounded-pill px-5">Update</button>
           </div>
         </form>
       </div>

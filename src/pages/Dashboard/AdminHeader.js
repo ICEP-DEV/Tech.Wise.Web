@@ -49,7 +49,7 @@ function AdminHeader({ toggleSidebar }) {
                                     </Link>
                                 ))
                             ) : (
-                                <div className='dropdown-item'>No notifications</div>
+                                <Link to={`/notifications`} className='dropdown-item'>No notifications</Link>
                             )}
                         </div>
                     )}

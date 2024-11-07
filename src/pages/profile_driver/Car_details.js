@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { assets } from '../../assets/assets';
 import { IoIosArrowBack } from 'react-icons/io';
 import axios from 'axios';
 
 const Car_details = ({ userId }) => {
+    // Configure axios to include credentials in requests
     axios.defaults.withCredentials = true;
+
+    // State to hold form data
     const [formData, setFormData] = useState({
         carMake: '',
         carModel: '',
@@ -14,36 +17,46 @@ const Car_details = ({ userId }) => {
         carColor: '',
         licensePlate: '',
         carImage: null,
-        userId: userId
+        userId: userId // Initialize with user ID
     });
-    console.log('user car list id:', userId);
+
+    // State to hold form validation errors
     const [errors, setErrors] = useState({});
+
+    // State to handle user role (default is 'driver')
     const [role, setRole] = useState('driver');
 
+    // Handle input changes for text fields
     const handleInput = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    // Handle file input changes
     const handleFileInput = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.files[0] });
     };
 
+    // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
         // Validation checks
         let newErrors = {};
         let formIsValid = true;
     
+        // Check if car make is provided
         if (!formData.carMake.trim()) {
             newErrors.carMake = 'Please enter car make';
             formIsValid = false;
         }
     
+        // Check if car model is provided
         if (!formData.carModel.trim()) {
             newErrors.carModel = 'Please enter car model';
             formIsValid = false;
         }
     
+        // Check if car year is provided and is a valid 4-digit year
         if (!formData.carYear.trim()) {
             newErrors.carYear = 'Please enter car year';
             formIsValid = false;
@@ -52,33 +65,37 @@ const Car_details = ({ userId }) => {
             formIsValid = false;
         }
     
+        // Check if number of seats is provided
         if (!formData.carSeats.trim()) {
             newErrors.carSeats = 'Please enter number of seats';
             formIsValid = false;
         }
     
+        // Check if car color is provided
         if (!formData.carColor.trim()) {
             newErrors.carColor = 'Please enter car color';
             formIsValid = false;
         }
     
+        // Check if license plate is provided
         if (!formData.licensePlate.trim()) {
             newErrors.licensePlate = 'Please enter license plate';
             formIsValid = false;
         }
     
+        // Check if car image is uploaded
         if (!formData.carImage) {
             newErrors.carImage = 'Please upload car image';
             formIsValid = false;
         }
     
+        // Set validation errors in state
         setErrors(newErrors);
 
-            // Configuring headers
-            const config = { 
-                headers: { 'Content-Type': 'multipart/form-data' } 
-            }
-        
+        // Configure headers for multipart/form-data
+        const config = { 
+            headers: { 'Content-Type': 'multipart/form-data' } 
+        }
     
         if (formIsValid) {
             try {
@@ -92,33 +109,33 @@ const Car_details = ({ userId }) => {
                 formDataToSend.append('licensePlate', formData.licensePlate);
                 formDataToSend.append('carImage', formData.carImage);
                 formDataToSend.append('userId', userId);
+                
                 // Make POST request to server to upload car details
                 const response = await axios.post('http://localhost:8085/car_listing', formDataToSend, config);
                 console.log('Server response:', response.data);
+                
+                // Redirect user after successful submission
                 window.location.href = '/profile-driver';
-                // Redirect or show success message after successful submission
+                
             } catch (error) {
                 console.error('Error uploading car details:', error);
                 // Handle error, show error message, or retry
             }
 
-            //update the role to driver
+            // Update the user role to 'driver'
             try {
-            setRole()
-              const response = await axios.put(`http://localhost:8085/edit_user/${userId}`, role);
+                // No need to call setRole() here as it is not setting the role
+                const response = await axios.put(`http://localhost:8085/edit_user/${userId}`, { role: 'driver' });
+                console.log('Role updated:', response.data);
             } catch (error) {
-              console.log(error);
+                console.log('Error updating role:', error);
+                // Handle error, show error message, or retry
             }
-
-
         }
     };
     
-
-
-
     return (
-        <div className="container py-5 mb-5 ">
+        <div className="container py-5 mb-5">
             <div className="container-fluid d-flex flex-column justify-content-between align-items-center customReg-margin-top">
                 <form onSubmit={handleSubmit} className="p-5 shadow-lg rounded bg-light" encType={'multipart/form-data'}>
                     <Link to="/profile-driver">
@@ -127,11 +144,12 @@ const Car_details = ({ userId }) => {
                         </button>
                     </Link>
                     <div className="text-center mb-4">
-                        <img src={assets.profile2} alt="Driver update Profile" className=" rounded-circle w-50" />
+                        <img src={assets.profile2} alt="Driver update Profile" className="rounded-circle w-50" />
                     </div>
-                    <h1 className="text-center mb-4">Car Details</h1>
+                    <h1 className="text-center text-dark mb-4">Car Details</h1>
                     <div className="row mb-3">
                         <div className="col-md-6">
+                            {/* Input fields for car details */}
                             <div className="form-group">
                                 <label><b className="text-black">Car Make:</b></label>
                                 <input type="text" className="form-control" name="carMake" placeholder="Toyota" onChange={handleInput} />
