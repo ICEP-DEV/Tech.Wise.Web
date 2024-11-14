@@ -8,7 +8,8 @@ import { DestinationContext } from '../../Context/DestinationContext';
 import UpdatePayment from '../Modal/UpdatePayment';
 import CancellationReasonModal from '../../components/Modal/CancellationReasonModal';
 import { io } from 'socket.io-client';
-import toast from 'react-hot-toast';
+import toast, { Toaster } from 'react-hot-toast';
+import { useTrip } from '../../Context/TripContext';
 
 const socket = io.connect('http://localhost:8085');
 
@@ -24,6 +25,9 @@ const CustomerDetails = ({ driverId, driverName }) => {
   const [declinedTrips, setDeclinedTrips] = useState({});
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [reason, setReason] = useState('');
+
+  const { socket, isRideAccepted, setIsRideAccepted, loading, setLoading } = useTrip(); // Access context values
+
 
 
 
@@ -148,7 +152,7 @@ const CustomerDetails = ({ driverId, driverName }) => {
     }
   }, [expandedTripId, customersData, setSource, setDestination]);
 
-  const handleAccept = async (driverId, tripId) => {
+  const handleCustomerTripAccept = async (driverId, tripId) => {
     try {
       const response = await axios.post('http://localhost:8085/api/update-trip-status', { driverId, tripId });
       console.log(response.data.message);
@@ -164,7 +168,7 @@ const CustomerDetails = ({ driverId, driverName }) => {
     setShowCancelModal(true);
   };
 
-  const handleCancel = async (tripId, reason) => {
+  const handleCustomerTripCancel = async (tripId, reason) => {
     if (!currentTrip) return;
   
     const { driverId, distance_traveled } = currentTrip;
@@ -214,9 +218,27 @@ const CustomerDetails = ({ driverId, driverName }) => {
       console.error('Error updating payment status:', error);
     }
   };
+  useEffect(() => {
+    if (socket) {
+        socket.on('customerCancelTrip', ({ tripId }) => {
+            console.log(`Trip ${tripId} was cancelled by the customer`);
+            toast.error('The customer has cancelled the trip.', {
+                duration: 5000,
+            });
+        });
+
+        // Clean up the event listener on unmount
+        return () => {
+            socket.off('customerCancelTrip');
+        };
+    }
+}, [socket]);
+
+  
 
   return (
     <div className="customer-details-container">
+       <Toaster />
       <h1 className="text-center text-dark mb-3">Trip Requests</h1>
       {customersData.length === 0 ? (
         <div className="text-center mt-5">
@@ -288,7 +310,7 @@ const CustomerDetails = ({ driverId, driverName }) => {
                         ) : (
                           <button
                             className="btn btn-primary rounded-pill px-3 me-2"
-                            onClick={() => handleAccept(driverId, customer.trip_id)}
+                            onClick={() => handleCustomerTripAccept(driverId, customer.trip_id)}
                           >
                             <span className="small">{customer.statuses === 'On-Going' ? 'On-Going' : 'Accept'}</span>
                           </button>
@@ -330,7 +352,7 @@ const CustomerDetails = ({ driverId, driverName }) => {
                         onClose={() => setShowCancelModal(false)}
                         onCancel={(reason) => {
                           if (currentTrip) {
-                            handleCancel(currentTrip.trip_id, reason);
+                            handleCustomerTripCancel(currentTrip.trip_id, reason);
                           }
                         }}
                       />

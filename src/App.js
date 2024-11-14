@@ -38,7 +38,7 @@ function App() {
 
   return (
     <TripProvider>
-    <DriverProvider>  {/* Wrap the entire app with DriverProvider */}
+    <DriverProvider driverId={userData ? userData.userId : ''} >  {/* Wrap the entire app with DriverProvider */}
       <div className="mx-w-4 mx-auto">
         <Navbar userName={userData ? userData.username : ''} roles={userData ? userData.role : ''} userId={userData ? userData.userId : ''} />
         <div className="max-w-7xl mx-auto mt-6">

@@ -1,7 +1,11 @@
+// src/components/GoogleMapSection1.js
+
 import React, { useContext, useEffect, useState, useCallback } from 'react';
 import { DirectionsRenderer, GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
 import { SourceContext } from '../../Context/SourceContext';
 import { DestinationContext } from '../../Context/DestinationContext';
+import { useDriver } from '../../Context/DriverContext'; // Assuming DriverContext is being used
+
 import { assets } from '../../assets/assets';
 
 const containerStyle = {
@@ -25,6 +29,7 @@ const GoogleMapSection1 = ({ roles, userId }) => {
     const [center, setCenter] = useState(null);
     const [directions, setDirections] = useState(null);
     const [nearbyDrivers, setNearbyDrivers] = useState([]);
+    const { driverPosition } = useDriver(); // Access driver position from context
 
     useEffect(() => {
         navigator.geolocation.getCurrentPosition(
@@ -125,6 +130,18 @@ const GoogleMapSection1 = ({ roles, userId }) => {
         setMap(null);
     }, []);
 
+    // Log and validate driver position if role is 'driver' and driverPosition is available
+    useEffect(() => {
+        if (roles === 'driver' && driverPosition) {
+            console.log('Driver Position:', driverPosition); // Log driver position for debugging
+            if (typeof driverPosition.lat === 'number' && typeof driverPosition.lng === 'number') {
+                console.log('Valid driver position:', driverPosition);
+            } else {
+                console.error('Invalid driver position:', driverPosition);
+            }
+        }
+    }, [roles, driverPosition]);
+
     return isLoaded && center ? (
         <GoogleMap
             mapContainerStyle={containerStyle}
@@ -139,6 +156,21 @@ const GoogleMapSection1 = ({ roles, userId }) => {
             )}
             {destination && (
                 <Marker position={{ lat: destination.lat, lng: destination.lng }} title={destination.label} />
+            )}
+
+            {/* Conditionally render driver position marker if role is driver */}
+            {roles === 'driver' && driverPosition && typeof driverPosition.lat === 'number' && typeof driverPosition.lng === 'number' && (
+                <Marker
+                    position={{
+                        lat: driverPosition.lat,
+                        lng: driverPosition.lng,
+                    }}
+                    title={`Driver Position (UserId: ${userId})`}
+                    icon={{
+                        url: assets.carDriver,
+                        scaledSize: new window.google.maps.Size(60, 50),
+                    }}
+                />
             )}
 
             {nearbyDrivers.map((driver) => (

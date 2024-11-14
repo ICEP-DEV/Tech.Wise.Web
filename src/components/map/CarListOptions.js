@@ -12,6 +12,7 @@ import { SourceContext } from '../../Context/SourceContext';
 import { DestinationContext } from '../../Context/DestinationContext';
 import LoadingModal from '../../components/Modal/LoadingModal'; // Import the LoadingModal component
 
+
 // Initialize the socket connection to the server
 const socket = io('http://localhost:8085');
 
@@ -29,33 +30,12 @@ const CarListOptions = ({ distance, pickup, dropOff, customerId, customerName, e
   const { tripRequested, initiateTrip, isNight, isBadWeather } = useTrip(); // Get trip data from context
   const { source, setSource } = useContext(SourceContext);
   const { destination, setDestination } = useContext(DestinationContext);
-  const [isRideAccepted, setIsRideAccepted] = useState(false);
-  const [loading, setLoading] = useState(false); // State for loading modal
+  // const [isRideAccepted, setIsRideAccepted] = useState(false);
+  // const [loading, setLoading] = useState(false); // State for loading modal
+  const { socket, isRideAccepted, setIsRideAccepted, loading, setLoading } = useTrip(); // Access context values
   // Access the driver position from context
   const { driverPosition } = useDriver();
 
-  useEffect(() => {
-    // Ensure that socket listeners are only set once
-    socket.on('tripAccepted', () => {
-      if (!isRideAccepted) { // Check to avoid duplicated toasts
-        toast.success( 'Your ride is being accepted!'); 
-        setIsRideAccepted(true); // Update state to reflect acceptance
-        setLoading(false);
-      }
-    });
-  
-    socket.on('tripCancelled', () => {
-      toast.success('Your ride was cancelled!'); // Updated message for cancellation
-      setIsRideAccepted(false); // Reset acceptance state if canceled
-    });
-  
-    // Clean up listeners when component unmounts
-    return () => {
-      socket.off('tripAccepted');
-      socket.off('tripCancelled');
-    };
-  }, [isRideAccepted]); // Dependency array ensures that event listeners are set once and state changes are taken into account
-  
 
   useEffect(() => {
     const fetchCarListData = async () => {
@@ -109,7 +89,7 @@ const CarListOptions = ({ distance, pickup, dropOff, customerId, customerName, e
         pickup,
         dropOff,
         customerName,
-        amount: calculateAmount(selectedCar),
+        amount: calculateAmount(selectedCar), 
       });
   
       // Delay closing the disability modal for 2 seconds and set payment initiation flag
@@ -161,7 +141,7 @@ const CarListOptions = ({ distance, pickup, dropOff, customerId, customerName, e
 
     const requestData = {
       customerId,
-      driverId: selectedCar.driverId,
+      driverId: selectedCar.driverId, 
       requestDate: currentDate,
       currentDate,
       pickUpLocation: pickup.label,

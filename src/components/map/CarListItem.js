@@ -1,33 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { HiUser, HiOutlineClock } from 'react-icons/hi'; // Import icons for user interface
 import '../../index.css'; // Import CSS styles
+import { useDriver } from '../../Context/DriverContext'; // Import useDriver hook for accessing driver position
 
 // Component to display car details in a list item format
 const CarListItem = ({ car, distance, pickup, onClick, amount }) => {
-  // State to store driver's current position
-  const [driverPosition, setDriverPosition] = useState(null);
-
-  // Effect to get driver's real-time position
-  useEffect(() => {
-    // Watch for changes in the driver's position
-    const watchId = navigator.geolocation.watchPosition(
-      (position) => {
-        // Update driver's position state with latitude and longitude
-        setDriverPosition({
-          lat: position.coords.latitude,
-          lon: position.coords.longitude,
-        });
-      },
-      (error) => {
-        console.error('Error getting driver position:', error); // Log any errors
-      }
-    );
-
-    // Clear watch position on component unmount to prevent memory leaks
-    return () => {
-      navigator.geolocation.clearWatch(watchId);
-    };
-  }, []);
+  // Access driver position from context
+  const { driverPosition } = useDriver();
 
   // Function to calculate the estimated arrival time of the driver
   const calculateArrivalTime = () => {
@@ -85,6 +64,12 @@ const CarListItem = ({ car, distance, pickup, onClick, amount }) => {
           <div className={`car-desc ${isFemale ? 'female-car-desc' : ''} text-white`}>
             <p className="text-gray-600">{car.description}</p>
           </div>
+          {/* Display driver’s current position */}
+          {driverPosition && (
+            <div className="driver-position">
+              <p>Driver Position: {driverPosition.lat}, {driverPosition.lon}</p>
+            </div>
+          )}
         </div>
       </div>
       {/* Display car price and estimated arrival time */}

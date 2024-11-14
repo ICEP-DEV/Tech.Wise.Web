@@ -1,70 +1,60 @@
-// TripContext.js
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
-import axios from 'axios';
 import toast from 'react-hot-toast';
-import dummyWeatherData from '../../src/utils/dummyWeatherData'; // Import the dummy data
 
-// Initialize the socket
-const socket = io('http://localhost:8085');
+// Create the TripContext
+export const TripContext = createContext();
 
-// Create TripContext
-const TripContext = createContext();
-
-// Custom hook to use TripContext
-export const useTrip = () => {
-  return useContext(TripContext);
-};
-
-// TripProvider component to wrap around components needing trip state
 export const TripProvider = ({ children }) => {
-  const [tripData, setTripData] = useState(null);
-  const [tripRequested, setTripRequested] = useState(false);
-  const [isNight, setIsNight] = useState(false);
-  const [isBadWeather, setIsBadWeather] = useState(false);
+  const [isRideAccepted, setIsRideAccepted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  // Listen to socket events for trip updates
+  // Initialize socket connection
+  const socket = io('http://localhost:8085');
+
   useEffect(() => {
+    // Event listener for trip acceptance
     socket.on('tripAccepted', () => {
-      toast.success('Your ride is being accepted!');
+      console.log('tripAccepted event received');
+      toast.success('Your ride is being accepted!', {
+        duration: 5000, // Toast will stay for 5 seconds
+      });
+      setIsRideAccepted(true);
+      setLoading(false);
     });
 
-    socket.on('tripCancelled', (data) => {
-      toast.error(data.message);
-      setTripRequested(false); // Reset trip request status if canceled
+    // Event listener for trip cancellation
+    socket.on('tripCancelled', () => {
+      console.log('tripCancelled event received33333333333');
+      toast.success(`Trip has been cancelled.`, {
+        duration: 5000, // Toast will stay for 5 seconds
+      });
+      setIsRideAccepted(false);  // Update the state or perform any additional actions
+    });
+    // Event listener for trip cancellation
+    socket.on('customerCancelTrip', () => {
+      console.log('customerCancelTrip event received4444444444444444');
+      toast.success(`Trip has been cancelled by customer.`, {
+        duration: 5000, // Toast will stay for 5 seconds
+      });
+      setIsRideAccepted(false);  // Update the state or perform any additional actions
     });
 
+
+    // Clean up listeners on unmount
     return () => {
       socket.off('tripAccepted');
+      socket.off('customerCancelTrip');
       socket.off('tripCancelled');
     };
   }, []);
 
-  // Fetch time and weather data from server
-  useEffect(() => {
-    const fetchTimeAndWeather = async () => {
-      try {
-        const { currentHour, weatherCondition } = dummyWeatherData; // Replace this with real-time API if available
-
-        setIsNight(currentHour >= 22 || currentHour < 6);
-        setIsBadWeather(weatherCondition === 'storm' || weatherCondition === 'rain');
-      } catch (error) {
-        console.error('Error fetching weather or time:', error);
-      }
-    };
-
-    fetchTimeAndWeather();
-  }, []);
-
-  const initiateTrip = (tripInfo) => {
-    setTripData(tripInfo);
-    setTripRequested(true);
-    socket.emit('tripRequested', tripInfo); // Emit event for real-time communication
-  };
-
   return (
-    <TripContext.Provider value={{ tripData, tripRequested, initiateTrip, isNight, isBadWeather }}>
+    <TripContext.Provider value={{ socket, isRideAccepted, setIsRideAccepted, loading, setLoading }}>
       {children}
     </TripContext.Provider>
   );
 };
+
+// Custom hook for easier access to the context
+export const useTrip = () => useContext(TripContext);

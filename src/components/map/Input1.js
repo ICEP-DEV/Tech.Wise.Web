@@ -35,7 +35,7 @@ const Input1 = ({ type }) => {
                 type === 'source' ? setSource(newLocation) : setDestination(newLocation);
             }
         });
-    };
+    }; 
 
     const getCurrentLocation = () => {
         if (navigator.geolocation) {
@@ -72,11 +72,11 @@ const Input1 = ({ type }) => {
                     );
                 },
                 (error) => {
-                    console.error("Error getting location:", error);
+                    console.error("Error getting location:", error);    
                 },
                 {
                     enableHighAccuracy: true,
-                    timeout: 5000,
+                    timeout: 10000,
                     maximumAge: 0
                 }
             );
