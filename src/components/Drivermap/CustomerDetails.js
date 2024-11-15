@@ -10,13 +10,14 @@ import CancellationReasonModal from '../../components/Modal/CancellationReasonMo
 import { io } from 'socket.io-client';
 import toast, { Toaster } from 'react-hot-toast';
 import { useTrip } from '../../Context/TripContext';
+import { useDriver } from '../../Context/DriverContext'; // Import the custom hook
 
 const socket = io.connect('http://localhost:8085');
 
-const CustomerDetails = ({ driverId, driverName }) => {
+const CustomerDetails = ({ driverId, driverName, role }) => {
   const [customersData, setCustomersData] = useState([]);
   const [expandedTripId, setExpandedTripId] = useState(null);
-  const [driverPosition, setDriverPosition] = useState(null);
+  // const [driverPosition, setDriverPosition] = useState(null);
   const [acceptedTrips, setAcceptedTrips] = useState([]);
   const { setSource } = useContext(SourceContext);
   const { setDestination } = useContext(DestinationContext);
@@ -25,46 +26,58 @@ const CustomerDetails = ({ driverId, driverName }) => {
   const [declinedTrips, setDeclinedTrips] = useState({});
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [reason, setReason] = useState('');
+  const [pickupCoords, setPickupLocation] = useState(null); // State to store the pickup location
 
+
+  const { driverPosition } = useDriver(); // Access driver position from the custom hook
   const { socket, isRideAccepted, setIsRideAccepted, loading, setLoading } = useTrip(); // Access context values
 
-
-
-
-  useEffect(() => {
-    const watchId = navigator.geolocation.watchPosition(
-      (position) => {
-        setDriverPosition({
-          lat: position.coords.latitude,
-          lon: position.coords.longitude
-        });
-      },
-      (error) => {
-        console.error('Error getting driver position:', error);
-      }
-    );
-
-    return () => {
-      navigator.geolocation.clearWatch(watchId);
-    };
-  }, []);
-
+  // // Function to validate if lat and lng are valid numbers
+  // const isValidCoordinate = (lat, lng) => {
+  //   return !isNaN(lat) && !isNaN(lng) && isFinite(lat) && isFinite(lng);
+  // };
+  // Fetch user trip details
+  // Fetch user trip details and pickup location
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axios.get(`http://localhost:8085/api/user-trip-details-pending?driverId=${driverId}`);
+        console.log("API response  trip details and pickup location:", response.data);
 
-        const sortedTrips = response.data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        const sortedTrips = Array.isArray(response.data.results)
+          ? response.data.results.sort((a, b) => new Date(b.requestDate) - new Date(a.requestDate))
+          : [];
 
         const latestTrips = sortedTrips.slice(0, 5);
-
         setCustomersData(latestTrips);
 
         const ongoingTrips = latestTrips.filter((trip) => trip.statuses === 'on-going');
         setAcceptedTrips(ongoingTrips.map((trip) => trip.trip_id));
 
         if (latestTrips.length > 0) {
-          setExpandedTripId(latestTrips[0].trip_id); // Automatically expand the latest trip
+          setExpandedTripId(latestTrips[0].trip_id);
+
+          let pickUpCoordinates = latestTrips[0].pickUpCoordinates;
+          // Convert to JSON if it's a string
+          if (typeof pickUpCoordinates === 'string') {
+            try {
+              pickUpCoordinates = JSON.parse(pickUpCoordinates);
+            } catch (error) {
+              console.error("Error parsing pickUpCoordinates:", error);
+              return;
+            }
+          }
+
+          const { lat, lng } = pickUpCoordinates;
+
+          // Ensure both lat and lng are valid numbers
+          if (typeof lat === 'number' && !isNaN(lat) && typeof lng === 'number' && !isNaN(lng)) {
+            console.log("Valid pickup coordinates:", { lat, lng });
+            setPickupLocation(pickUpCoordinates);
+            // setSource({ lat, lng });  // This will match the expected structure in map.panTo
+          } else {
+            console.error("Invalid coordinates detected:", { lat, lng });
+          }
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -72,6 +85,38 @@ const CustomerDetails = ({ driverId, driverName }) => {
     };
     fetchData();
   }, [driverId]);
+
+  useEffect(() => {
+    console.log("Effect triggered:", { driverPosition, role, pickupCoords });
+
+    if (driverPosition && role === 'driver') {
+        const { lat, lng } = driverPosition;
+        console.log("Driver position:", driverPosition); // Log driver position
+
+        if (!isNaN(lat) && !isNaN(lng)) {
+            // Valid coordinates, set them in the SourceContext with role 'driver'
+            console.log("Setting source with driver position:", { lat, lng });
+            setSource({ lat, lng, role: 'driver' });
+        } else {
+            console.error("Invalid driver position:", driverPosition);
+        }
+    }
+
+    if (pickupCoords && role === 'driver') {
+        const { lat, lng } = pickupCoords;
+        console.log("Pickup coordinates%%%%%%%%%%%%%%%:", pickupCoords); // Log pickup coordinates
+
+        if (!isNaN(lat) && !isNaN(lng)) {
+            // Set the destination coordinates in the DestinationContext
+            console.log("Setting destination with pickup coordinates:", { lat, lng });
+            setDestination({ lat, lng, role: 'driver' });
+        } else {
+            console.error("Invalid destination coordinates:", pickupCoords);
+        }
+    }
+
+}, [driverPosition, role, pickupCoords, setSource, setDestination]);
+
 
   const toggleDetails = (tripId) => {
     if (expandedTripId === tripId) {
@@ -85,10 +130,10 @@ const CustomerDetails = ({ driverId, driverName }) => {
     const toRad = (x) => x * Math.PI / 180;
 
     const lat1 = coords1.lat;
-    const lon1 = coords1.lon;
+    const lon1 = coords1.lng;
 
     const lat2 = coords2.lat;
-    const lon2 = coords2.lon;
+    const lon2 = coords2.lng;
 
     const R = 6371; // Radius of the Earth in kilometers
     const dLat = toRad(lat2 - lat1);
@@ -100,9 +145,9 @@ const CustomerDetails = ({ driverId, driverName }) => {
     return R * c; // Distance in kilometers
   };
 
-  const calculateDistanceToPickUp = (pickUpCoordinates) => {
-    if (driverPosition && pickUpCoordinates) {
-      return haversineDistance(driverPosition, pickUpCoordinates).toFixed(2);
+  const calculateDistanceToPickUp = (pickupCoords) => {
+    if (driverPosition && pickupCoords) {
+      return haversineDistance(driverPosition, pickupCoords).toFixed(2);
     }
     return 'N/A';
   };
@@ -144,9 +189,9 @@ const CustomerDetails = ({ driverId, driverName }) => {
     if (expandedTripId !== null && customersData.length > 0) {
       const trip = customersData.find(trip => trip.trip_id === expandedTripId);
       if (trip) {
-        const { pickUpCoordinates, dropOffCoordinates } = trip;
-        
-        setSource(pickUpCoordinates);
+        const { pickupCoords, dropOffCoordinates } = trip;
+
+        setSource(pickupCoords);
         setDestination(dropOffCoordinates);
       }
     }
@@ -170,11 +215,11 @@ const CustomerDetails = ({ driverId, driverName }) => {
 
   const handleCustomerTripCancel = async (tripId, reason) => {
     if (!currentTrip) return;
-  
+
     const { driverId, distance_traveled } = currentTrip;
     const currentDate = new Date().toISOString();
     const distance = distance_traveled;
-  
+
     const cancelData = {
       driverId: driverId,
       currentDate,
@@ -183,11 +228,11 @@ const CustomerDetails = ({ driverId, driverName }) => {
       cancel_by: driverName,
       distance_travelled: distance
     };
-  
+
     try {
       const response = await axios.patch(`http://localhost:8085/api/tripsDriver/${tripId}`, cancelData);
       console.log('Trip cancellation sent:', response.data);
-  
+
       setDeclinedTrips(prevState => ({
         ...prevState,
         [tripId]: true
@@ -218,27 +263,27 @@ const CustomerDetails = ({ driverId, driverName }) => {
       console.error('Error updating payment status:', error);
     }
   };
-  useEffect(() => {
-    if (socket) {
-        socket.on('customerCancelTrip', ({ tripId }) => {
-            console.log(`Trip ${tripId} was cancelled by the customer`);
-            toast.error('The customer has cancelled the trip.', {
-                duration: 5000,
-            });
-        });
+  //   useEffect(() => {
+  //     if (socket) {
+  //         socket.on('customerCancelTrip', ({ tripId }) => {
+  //             console.log(`Trip ${tripId} was cancelled by the customer`);
+  //             toast.error('The customer has cancelled the trip.', {
+  //                 duration: 5000,
+  //             });
+  //         });
 
-        // Clean up the event listener on unmount
-        return () => {
-            socket.off('customerCancelTrip');
-        };
-    }
-}, [socket]);
+  //         // Clean up the event listener on unmount
+  //         return () => {
+  //             socket.off('customerCancelTrip');
+  //         };
+  //     }
+  // }, [socket]);
 
-  
+
 
   return (
     <div className="customer-details-container">
-       <Toaster />
+      <Toaster />
       <h1 className="text-center text-dark mb-3">Trip Requests</h1>
       {customersData.length === 0 ? (
         <div className="text-center mt-5">
@@ -333,7 +378,7 @@ const CustomerDetails = ({ driverId, driverName }) => {
                         >
                           <span className="small">Got paid?</span>
                         </button>
-                      ) : (    
+                      ) : (
                         <></>
                       )}
                     </div>

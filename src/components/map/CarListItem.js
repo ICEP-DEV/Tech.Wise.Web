@@ -67,7 +67,7 @@ const CarListItem = ({ car, distance, pickup, onClick, amount }) => {
           {/* Display driver’s current position */}
           {driverPosition && (
             <div className="driver-position">
-              <p>Driver Position: {driverPosition.lat}, {driverPosition.lon}</p>
+              <p>Driver Position: {driverPosition.lat}, {driverPosition.lng}</p>
             </div>
           )}
         </div>

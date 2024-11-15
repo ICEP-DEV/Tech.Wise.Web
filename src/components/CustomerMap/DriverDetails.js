@@ -1,45 +1,34 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { FaStar, FaStarHalfAlt, FaRegStar, FaPhoneAlt, FaMapMarkerAlt, FaClock } from 'react-icons/fa';
 import axios from 'axios';
+import { FaStar, FaStarHalfAlt, FaRegStar, FaPhoneAlt, FaMapMarkerAlt, FaClock } from 'react-icons/fa';
 import { SourceContext } from '../../Context/SourceContext';
 import { DestinationContext } from '../../Context/DestinationContext';
 import { useTrip } from '../../Context/TripContext';
+import { useDriver } from '../../Context/DriverContext';
 import '../Drivermap/CustomerDetails.css';
 
-const DriverDetails = ({ driverId = 23 }) => {
+const DriverDetails = ({ driverId = 23, userId }) => {
   const [driverData, setDriverData] = useState(null);
-  const [driverPosition, setDriverPosition] = useState(null);
+  const [pickupCoords, setPickupLocation] = useState(null); // State to store the pickup location
   const { setSource } = useContext(SourceContext);
   const { setDestination } = useContext(DestinationContext);
   const { socket } = useTrip();
+  const { devicePosition } = useDriver();
 
+
+  
   useEffect(() => {
     const fetchDriverDetails = async () => {
       try {
         const response = await axios.get(`http://localhost:8085/api/driver-details/${driverId}`);
-        console.log("Driver data received:", response.data); // Log the response data
-        setDriverData(response.data); // Expecting response to be { driver: {...}, carDetails: {...} }
+        setDriverData(response.data);
       } catch (error) {
         console.error('Error fetching driver details:', error);
       }
     };
-  
+
     fetchDriverDetails();
   }, [driverId]);
-  
-  useEffect(() => {
-    const watchId = navigator.geolocation.watchPosition(
-      (position) => {
-        setDriverPosition({
-          lat: position.coords.latitude,
-          lon: position.coords.longitude,
-        });
-      },
-      (error) => console.error('Error getting driver position:', error)
-    );
-
-    return () => navigator.geolocation.clearWatch(watchId);
-  }, []);
 
   const renderStars = (rating) => {
     const fullStars = Math.floor(rating);
@@ -54,19 +43,6 @@ const DriverDetails = ({ driverId = 23 }) => {
         {[...Array(emptyStars)].map((_, index) => <FaRegStar key={`empty-${index}`} style={{ color: starColor }} />)}
       </>
     );
-  };
-
-  const calculateArrivalTime = (distance) => {
-    const speed = 60;
-    const timeInMinutes = (distance / speed) * 60;
-
-    if (timeInMinutes < 60) {
-      return `${Math.round(timeInMinutes)} min`;
-    } else {
-      const hours = Math.floor(timeInMinutes / 60);
-      const minutes = Math.round(timeInMinutes % 60);
-      return `${hours} hr ${minutes} min`;
-    }
   };
 
   const handleDriverTripCancel = () => {
@@ -114,6 +90,28 @@ const DriverDetails = ({ driverId = 23 }) => {
           </div>
         </div>
       </div>
+
+      {/* Display the driver's current position */}
+      {devicePosition && (
+        <div className="driver-position mb-4">
+          <h5>Driver's Current Location</h5>
+          <div>
+            <FaMapMarkerAlt className="me-2" />
+            Lat: {devicePosition.lat}, Lon: {devicePosition.lon}
+          </div>
+        </div>
+      )}
+
+      {/* Display the pickup location if available */}
+      {/* {pickupLocation && (
+        <div className="pickup-location mb-4">
+          <h5>Pickup Location</h5>
+          <div>
+            <FaMapMarkerAlt className="me-2" />
+            {pickupLocation.pickUpLocation} {/* Assuming `pickupLocation` has an `address` field *
+          </div>
+        </div>
+      )} */}
 
       <div className="d-flex justify-content-between mt-4">
         <button className="btn btn-primary" style={{ width: '48%' }}>Chat</button>

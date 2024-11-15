@@ -45,9 +45,9 @@ const Search = ({ roles, userId, userName, emails }) => {
               <div className='col-md-4 full-width-on-tablet'>
                 <div className='py-4 mt-5 shadow-lg rounded bg-light'>
                   {isDriver ? (
-                    <CustomerDetails driverId={userId} driverName={userName} />
+                    <CustomerDetails driverId={userId} driverName={userName} role={roles} />
                   ) : showComponent === 'driver' ? (
-                    <DriverDetails userId={userId} customerName={userName} emails={emails} />
+                    <DriverDetails userId={userId} customerName={userName} emails={emails} role={roles} />
                   ) : showComponent === 'search' ? (
                     <SearchSection1 userId={userId} customerName={userName} emails={emails} />
                   ) : null}

@@ -4,8 +4,8 @@ import React, { useContext, useEffect, useState, useCallback } from 'react';
 import { DirectionsRenderer, GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
 import { SourceContext } from '../../Context/SourceContext';
 import { DestinationContext } from '../../Context/DestinationContext';
-import { useDriver } from '../../Context/DriverContext'; // Assuming DriverContext is being used
-
+import { useDriver } from '../../Context/DriverContext'; // Assuming DriverContext is correctly set up
+import { useTrip } from '../../Context/TripContext'; // Assuming TripContext is correctly set up for trip details
 import { assets } from '../../assets/assets';
 
 const containerStyle = {
@@ -22,15 +22,29 @@ const GoogleMapSection1 = ({ roles, userId }) => {
         googleMapsApiKey: apiKey,
         libraries,
     });
+    console.log("rrrrrrrrrrrrrr", roles, userId);
+    const { source, setSource } = useContext(SourceContext);
+    const { destination, setDestination } = useContext(DestinationContext);
+    const { driverPosition } = useDriver();
+    const { isRideAccepted, pickup } = useTrip();
 
-    const { source } = useContext(SourceContext);
-    const { destination } = useContext(DestinationContext);
     const [map, setMap] = useState(null);
     const [center, setCenter] = useState(null);
     const [directions, setDirections] = useState(null);
     const [nearbyDrivers, setNearbyDrivers] = useState([]);
-    const { driverPosition } = useDriver(); // Access driver position from context
+    const [validatedDriverPostion, setValidateddDriver] = useState([]);
+    // console.log("rrrrrrrrrrrrrr",driverPosition);
 
+    // Set source to driver's position and destination to pickup location if ride is accepted
+    // useEffect(() => {
+    //     if (isRideAccepted===false) {
+    //         console.log("99999999999999999999pickup", pickup);
+    //         setSource(driverPosition);
+    //         setDestination(pickup);
+    //     }
+    // }, [isRideAccepted, driverPosition, pickup, setSource, setDestination]);
+
+    // Set initial map center to user's current geolocation
     useEffect(() => {
         navigator.geolocation.getCurrentPosition(
             (position) => {
@@ -44,30 +58,33 @@ const GoogleMapSection1 = ({ roles, userId }) => {
         );
     }, []);
 
+    // Update center when source or destination is changed
     useEffect(() => {
         if (source && map) {
-            map.panTo({
-                lat: source.lat,
-                lng: source.lng,
-            });
-            setCenter({
-                lat: source.lat,
-                lng: source.lng,
-            });
+            const lat = parseFloat(source.lat);
+            const lng = parseFloat(source.lng);
+            // console.log("coordinatessssss====s---s-s--s", source.lat, source.lng);
+            if (!isNaN(lat) && !isNaN(lng)) {
+                const validCoordinates = { lat, lng };
+                map.panTo(validCoordinates);
+                setCenter(validCoordinates);
+                console.log('Correct coordinates passed to panTo:', validCoordinates);
+            } else {
+                console.error("Invalid source coordinates detected:", source);
+            }
         }
     }, [source, map]);
 
+
+
     useEffect(() => {
         if (destination && map) {
-            setCenter({
-                lat: destination.lat,
-                lng: destination.lng,
-            });
+            setCenter({ lat: destination.lat, lng: destination.lng });
             fetchDirections();
         }
     }, [destination, map]);
 
-    const fetchDirections = () => {
+    const fetchDirections = useCallback(() => {
         if (!source || !destination || !window.google) return;
 
         const directionsService = new window.google.maps.DirectionsService();
@@ -85,42 +102,40 @@ const GoogleMapSection1 = ({ roles, userId }) => {
                 }
             }
         );
-    };
+    }, [source, destination]);
 
-    const fetchNearbyDrivers = async () => {
-        if (!source) return;
+    // const fetchNearbyDrivers = useCallback(async () => {
+    //     if (!source) return;
 
-        try {
-            const response = await fetch(`http://localhost:8085/api/drivers/nearby?lat=${source.lat}&lng=${source.lng}`);
-            if (!response.ok) {
-                throw new Error('Failed to fetch nearby drivers');
-            }
-            const data = await response.json();
+    //     try {
+    //         const response = await fetch(`http://localhost:8085/api/drivers/nearby?lat=${source.lat}&lng=${source.lng}`);
+    //         if (!response.ok) throw new Error('Failed to fetch nearby drivers');
 
-            const driverDetails = await Promise.all(
-                data.drivers.map(async (driver) => {
-                    try {
-                        const userResponse = await fetch(`http://localhost:8085/userInfo/${driver.users_id}`);
-                        if (!userResponse.ok) {
-                            throw new Error(`Failed to fetch user details for driver ${driver.id}`);
-                        }
-                        const userInfo = await userResponse.json();
-                        return { ...driver, userInfo };
-                    } catch (userError) {
-                        console.error('Error fetching user details:', userError);
-                        return driver;
-                    }
-                })
-            );
-            setNearbyDrivers(driverDetails);
-        } catch (error) {
-            console.error('Error fetching nearby drivers:', error);
-        }
-    };
+    //         const data = await response.json();
 
-    useEffect(() => {
-        fetchNearbyDrivers();
-    }, [source]);
+    //         const driverDetails = await Promise.all(
+    //             data.drivers.map(async (driver) => {
+    //                 try {
+    //                     const userResponse = await fetch(`http://localhost:8085/userInfo/${driver.users_id}`);
+    //                     if (!userResponse.ok) throw new Error(`Failed to fetch user details for driver ${driver.id}`);
+
+    //                     const userInfo = await userResponse.json();
+    //                     return { ...driver, userInfo };
+    //                 } catch (userError) {
+    //                     console.error('Error fetching user details:', userError);
+    //                     return driver;
+    //                 }
+    //             })
+    //         );
+    //         setNearbyDrivers(driverDetails);
+    //     } catch (error) {
+    //         console.error('Error fetching nearby drivers:', error);
+    //     }
+    // }, [source]);
+
+    // useEffect(() => {
+    //     fetchNearbyDrivers();
+    // }, [source, fetchNearbyDrivers]);
 
     const onLoad = useCallback((map) => {
         setMap(map);
@@ -133,14 +148,36 @@ const GoogleMapSection1 = ({ roles, userId }) => {
     // Log and validate driver position if role is 'driver' and driverPosition is available
     useEffect(() => {
         if (roles === 'driver' && driverPosition) {
-            console.log('Driver Position:', driverPosition); // Log driver position for debugging
-            if (typeof driverPosition.lat === 'number' && typeof driverPosition.lng === 'number') {
+            setValidateddDriver(driverPosition);
+            console.log("@@@@@@@@@@@", destination);
+
+            // Ensure lat and lng are numbers
+            const lat = parseFloat(driverPosition.lat);
+            const lng = parseFloat(driverPosition.lng);
+
+            if (!isNaN(lat) && !isNaN(lng)) {
                 console.log('Valid driver position:', driverPosition);
             } else {
                 console.error('Invalid driver position:', driverPosition);
             }
         }
-    }, [roles, driverPosition]);
+
+        if (roles === 'driver' && destination) {
+            console.log("@@@@@@@@@@@ Destination:", destination);
+            const lat = parseFloat(destination.lat);
+            const lng = parseFloat(destination.lng);
+
+            // Check if the coordinates are valid numbers
+            if (!isNaN(lat) && !isNaN(lng)) {
+                console.log('Valid destination position:', destination);
+            } else {
+                console.error('Invalid destination position:', destination);
+            }
+        }
+    }, [roles, driverPosition, destination]);
+
+
+
 
     return isLoaded && center ? (
         <GoogleMap
@@ -152,26 +189,45 @@ const GoogleMapSection1 = ({ roles, userId }) => {
             options={{ mapId: 'a0b537a549595d0d' }}
         >
             {source && (
-                <Marker position={{ lat: source.lat, lng: source.lng }} title={source.label} />
+                // Check if lat and lng are valid numbers
+                <Marker
+                    position={{
+                        lat: !isNaN(parseFloat(source.lat)) ? parseFloat(source.lat) : 0,
+                        lng: !isNaN(parseFloat(source.lng)) ? parseFloat(source.lng) : 0,
+                    }}
+                    title={source.label || 'Source Location'}
+                />
             )}
+
             {destination && (
-                <Marker position={{ lat: destination.lat, lng: destination.lng }} title={destination.label} />
+                // Check if lat and lng are valid numbers
+                <Marker
+                    position={{
+                        lat: !isNaN(parseFloat(destination.lat)) ? parseFloat(destination.lat) : 0,
+                        lng: !isNaN(parseFloat(destination.lng)) ? parseFloat(destination.lng) : 0,
+                    }}
+                    title={destination.label || 'Destination Location'}
+                />
             )}
 
             {/* Conditionally render driver position marker if role is driver */}
-            {roles === 'driver' && driverPosition && typeof driverPosition.lat === 'number' && typeof driverPosition.lng === 'number' && (
-                <Marker
-                    position={{
-                        lat: driverPosition.lat,
-                        lng: driverPosition.lng,
-                    }}
-                    title={`Driver Position (UserId: ${userId})`}
-                    icon={{
-                        url: assets.carDriver,
-                        scaledSize: new window.google.maps.Size(60, 50),
-                    }}
-                />
-            )}
+            {roles === 'driver' && validatedDriverPostion &&
+                !isNaN(parseFloat(validatedDriverPostion.lat)) &&
+                !isNaN(parseFloat(validatedDriverPostion.lng)) && (
+                    <Marker
+                        position={{
+                            lat: parseFloat(validatedDriverPostion.lat),
+                            lng: parseFloat(validatedDriverPostion.lng),
+                        }}
+                        title={`Driver Position (UserId: ${userId})`}
+                        icon={{
+                            url: assets.carDriver,
+                            scaledSize: new window.google.maps.Size(60, 50),
+                        }}
+                    />
+                )
+            }
+
 
             {nearbyDrivers.map((driver) => (
                 <Marker

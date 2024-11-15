@@ -1,86 +1,91 @@
-// src/Context/DriverContext.js
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
-// Create context to share driver position
-const DriverContext = createContext();
+// Creating context to share device position
+const DriverContext = createContext({
+  driverPosition: null,
+  driverId: null,
+  role: null,
+}); 
 
-// Custom hook to access the driver position
+// Custom hook to access device position
 export const useDriver = () => {
   return useContext(DriverContext);
 };
 
-// Provider component
-export const DriverProvider = ({ children, driverId }) => {
+// Provider component to share state
+export const DriverProvider = ({ children, driverId, role }) => {
   const [driverPosition, setDriverPosition] = useState(null);
 
+  // useEffect(() => {
+  //   if (!navigator.geolocation) {
+  //     console.error('Geolocation is not supported by this browser.');
+  //     return;
+  //   }
+  
+  //   console.log('Watching device position...');
+  
+  //   const watchId = navigator.geolocation.watchPosition(
+  //     (position) => {
+  //       const newPosition = {
+  //         lat: position.coords.latitude,
+  //         lng: position.coords.longitude,
+  //       };
+  //       console.log('New device position:', newPosition);
+  //       setDriverPosition(newPosition);
+  
+  //       // Send position to backend if driverId and newPosition are available
+  //       // if (driverId && newPosition) {
+  //       //   axios.put('http://localhost:8085/api/driverPosition', {
+  //       //     driverId, // Pass the driverId to identify which driver to update
+  //       //     location: newPosition, // Send the position (lat, lng)
+  //       //   })
+  //       //   .then((response) => {
+  //       //     console.log('Driver position updated:', response.data);
+  //       //   })
+  //       //   .catch((error) => {
+  //       //     console.error('Error updating driver position:', error);
+  //       //   });
+  //       // }
+  //     },
+  //     (error) => console.error('Error getting device position:', error),
+  //     { enableHighAccuracy: true }
+  //   );
+  
+  //   // Cleanup: stop watching the position when the component is unmounted
+  //   return () => navigator.geolocation.clearWatch(watchId);
+  // }, [driverId]); // Runs the effect whenever the driverId changes
+  //get location from database
   useEffect(() => {
-    console.log('Driver ID:', driverId);  // Log driverId to see its value
-    if (!driverId) {
-        console.error('Driver ID is missing, cannot update location.');
-        return;
-    }
-
-    // Continue with the position watching logic...
-  }, [driverId]);
-
-  useEffect(() => {
-    if (!driverId) {
-        console.error('Driver ID is missing, cannot update location.');
-        return; // Don't start watching position until driverId is available
-    }
-
-    // Watch the driver's position using the Geolocation API
-    const watchId = navigator.geolocation.watchPosition(
-        (position) => {
+    if (driverId) {
+      // Fetch driver details from the API
+      axios.get(`http://localhost:8085/api/driver/${driverId}`)
+        .then((response) => {
+          console.log('Driver details fetched:', response.data);
+  
+          // Extract coordinates from the response (assuming the response structure is { location: { lat, lng } })
+          const { lat, lng } = response.data.location || {};
+  
+          if (lat && lng) {
+            // Create a new position object with the fetched coordinates
             const newPosition = {
-                lat: position.coords.latitude,
-                lon: position.coords.longitude,
+              lat: parseFloat(lat),  // Ensure it's a valid number
+              lng: parseFloat(lng),
             };
+  
+            // Update the driver's position with the new coordinates
             setDriverPosition(newPosition);
-
-            // Only update location if driverId is provided
-            updateDriverLocation(driverId, newPosition.lat, newPosition.lon);
-        },
-        (error) => {
-            console.error('Error getting driver position:', error);
-        },
-        { enableHighAccuracy: true } // optional: for better accuracy
-    );
-
-    // Cleanup: Stop watching the position when the component unmounts
-    return () => {
-        navigator.geolocation.clearWatch(watchId);
-    };
-  }, [driverId]); // Ensure the effect runs again if driverId changes
-
-  // Function to update the driver location in the database
-  const updateDriverLocation = async (driverId, current_lat, current_lng) => {
-    if (!driverId) {
-      console.error('Driver ID is missing');
-      return; // Prevent update if no driverId
+          } else {
+            console.error('Invalid location data:', response.data.location);
+          }
+        })
+        .catch((error) => {
+          console.error('Error fetching driver details:', error);
+        });
     }
-
-    console.log('Updating location for driverId:', driverId); // Debugging: Check driverId value
-    
-    // try {
-    //   const response = await axios.put(`http://localhost:8085/api/driver/update-location/${driverId}`, {
-    //     current_lat,
-    //     current_lng,
-    //   });
-
-    //   if (response.status === 200) {
-    //     console.log('Driver location updated in the database');
-    //   } else {
-    //     console.error('Failed to update driver location:', response);
-    //   }
-    // } catch (error) {
-    //   console.error('Error updating driver location in the database:', error);
-    // }
-  };
-
+  }, [driverId]);   //Runs the effect whenever the driverId changes
   return (
-    <DriverContext.Provider value={{ driverPosition }}>
+    <DriverContext.Provider value={{ driverPosition, driverId, role }}>
       {children}
     </DriverContext.Provider>
   );
